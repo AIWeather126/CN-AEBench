@@ -946,7 +946,8 @@
 
         // Chart 7: PM10/PM2.5 Ratio
         function createChart7() {
-            const ratioData = allData.map(d => ({
+            const mainStation = allData.filter(d => d.station === '51828');
+            const ratioData = mainStation.map(d => ({
                 datetime: d.datetime,
                 ratio: d.pm10 / d.pm25,
                 ws: d.ws,
