@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extreme Weather Event Analysis - Huizhou July 2024</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(30, 60, 114, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(42, 82, 152, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(126, 139, 163, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.4),
+                0 0 100px rgba(30, 60, 114, 0.2);
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1e3c72;
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #5a6c7d;
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        
+        .station-info-box {
+            background: linear-gradient(145deg, #f0f4f8, #d9e2ec);
+            border-left: 5px solid #2a5298;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .station-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .station-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .station-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        .station-name {
+            font-weight: 600;
+            color: #2a5298;
+            margin-bottom: 5px;
+        }
+        
+        .station-type {
+            font-size: 12px;
+            color: #7f8c8d;
+            display: inline-block;
+            padding: 2px 8px;
+            background: #ecf0f1;
+            border-radius: 12px;
+            margin-top: 5px;
+        }
+        
+        .warning-box {
+            background: linear-gradient(145deg, #fff5f5, #ffe0e0);
+            border-left: 6px solid;
+            border-image: linear-gradient(180deg, #ff6b6b, #ff8e53) 1;
+            padding: 25px;
+            margin-bottom: 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .warning-title {
+            font-weight: 700;
+            color: #d32f2f;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .warning-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .warning-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .warning-item.red {
+            background: linear-gradient(145deg, #ffebee, #ffcdd2);
+            border-left: 4px solid #d32f2f;
+        }
+        
+        .warning-item.orange {
+            background: linear-gradient(145deg, #fff3e0, #ffe0b2);
+            border-left: 4px solid #f57c00;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .file-input-label:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5);
+        }
+        
+        .chart-container {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 35px;
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.08),
+                inset 0 1px 3px rgba(255,255,255,0.5);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            box-shadow: 
+                0 15px 50px rgba(0,0,0,0.12),
+                inset 0 1px 3px rgba(255,255,255,0.5);
+        }
+        
+        .chart-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .chart-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            border-radius: 2px;
+        }
+        
+        .status-message {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: none;
+            font-weight: 500;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .status-message.success {
+            background: linear-gradient(145deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 1px solid #b1dfbb;
+            display: block;
+        }
+        
+        .status-message.error {
+            background: linear-gradient(145deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .status-message.info {
+            background: linear-gradient(145deg, #d1ecf1, #bee5eb);
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌧️ Extreme Rainstorm & Typhoon Event Analysis</h1>
+        <div class="subtitle">Huizhou, Guangdong | July 17-22, 2025</div>
+        
+        <!-- Station Information -->
+        <div class="station-info-box">
+            <div class="warning-title">
+                <span>📍</span>
+                <span>Meteorological Station Network</span>
+            </div>
+            <div class="station-grid">
+                <div class="station-item">
+                    <div class="station-name">惠东 (Huidong)</div>
+                    <div>Station: 59492</div>
+                    <div>Lon: 114.67°E, Lat: 23.03°N</div>
+                    <div class="station-type">旱地 (Dryland)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">龙门 (Longmen)</div>
+                    <div>Station: 59290</div>
+                    <div>Lon: 114.25°E, Lat: 23.78°N</div>
+                    <div class="station-type">水田 (Paddy Field)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">惠阳 (Huiyang)</div>
+                    <div>Station: 59298</div>
+                    <div>Lon: 114.37°E, Lat: 23.07°N</div>
+                    <div class="station-type">有林地 (Forest)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">博罗 (Boluo)</div>
+                    <div>Station: 59297</div>
+                    <div>Lon: 114.26°E, Lat: 23.18°N</div>
+                    <div class="station-type">城镇用地 (Urban)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Warning Information Box -->
+        <div class="warning-box">
+            <div class="warning-title">
+                <span>🚨</span>
+                <span>Meteorological Warning Timeline</span>
+            </div>
+            <div class="warning-grid">
+                <div class="warning-item orange">
+                    <strong>July 18, 2025</strong><br>
+                    🟠 Rainstorm Orange Warning<br>
+                </div>
+                <div class="warning-item red">
+                    <strong>July 18, 2025</strong><br>
+                    🔴 Rainstorm Red Warning<br>
+                </div>
+                <div class="warning-item orange">
+                    <strong>July 19, 2025 Evening</strong><br>
+                    🌀 Convective System Alert<br>
+                    Strong Wind & Heavy Rain
+                </div>
+            </div>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <!-- Chart 1: Multi-Parameter Time Series (Fixed Layout) -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 1. Comprehensive Meteorological Parameters During Extreme Event</div>
+            <div id="chart1" style="height: 600px;"></div>
+        </div>
+        
+        <!-- Chart 2: Precipitation & Visibility Relationship -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 2. Precipitation-Visibility-PM2.5 Relationship Analysis</div>
+            <div id="chart2" style="height: 500px;"></div>
+        </div>
+        
+        <!-- Chart 3: 3D Phase Space Analysis -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 3. Three-Dimensional Atmospheric State Evolution</div>
+            <div id="chart3" style="height: 550px;"></div>
+        </div>
+        
+        <!-- Chart 4: Wind Field Analysis -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 4. Wind Rose and Speed Distribution</div>
+            <div id="chart4" style="height: 500px;"></div>
+        </div>
+        
+        <!-- Two column layout -->
+        <div class="grid-2">
+            <!-- Chart 5: Hourly Pattern Analysis -->
+            <div class="chart-container">
+                <div class="chart-title">Figure 5. Diurnal Variation Pattern</div>
+                <div id="chart5" style="height: 400px;"></div>
+            </div>
+            
+            <!-- Chart 6: Station Comparison -->
+            <div class="chart-container">
+                <div class="chart-title">Figure 6. Multi-Station Comparison</div>
+                <div id="chart6" style="height: 400px;"></div>
+            </div>
+        </div>
+        
+        <!-- Chart 7: Precipitation Accumulation & Intensity -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 7. Precipitation Intensity and Cumulative Analysis</div>
+            <div id="chart7" style="height: 450px;"></div>
+        </div>
+        
+        <!-- Chart 9: Extreme Value Analysis -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 8. Extreme Value Statistical Distribution</div>
+            <div id="chart9" style="height: 450px;"></div>
+        </div>
+        
+        <!-- Chart 10: Pollutant Washout Effect -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 9. Air Quality Response to Precipitation</div>
+            <div id="chart10" style="height: 450px;"></div>
+        </div>
+        
+        <!-- Chart 11: Wind Vector Map -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 10. Spatial Wind Field Distribution</div>
+            <div id="chart11" style="height: 550px; position: relative;">
+                <img id="windFieldImage" src="" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
+                <div id="imageControls" style="text-align: center; margin-top: 10px;">
+                    <button onclick="playAnimation()" style="margin: 5px;">▶ Play</button>
+                    <button onclick="pauseAnimation()" style="margin: 5px;">⏸ Pause</button>
+                    <input type="range" id="timeSlider" min="0" max="143" value="0" style="width: 80%; margin: 10px;" oninput="updateImage(this.value)">
+                    <div id="timeLabel" style="font-weight: bold; margin-top: 5px;">Time: Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allData = [];
+        
+        // Station information
+        const stations = {
+            '59492': { name: 'Huidong', nameCN: '惠东', lon: 114.67, lat: 23.03, type: 'Dryland', alt: 85.0 },
+            '59290': { name: 'Longmen', nameCN: '龙门', lon: 114.25, lat: 23.78, type: 'Paddy Field', alt: 85.5 },
+            '59298': { name: 'Huiyang', nameCN: '惠阳', lon: 114.37, lat: 23.07, type: 'Forest', alt: 108.5 },
+            '59297': { name: 'Boluo', nameCN: '博罗', lon: 114.26, lat: 23.18, type: 'Urban', alt: 50.2 }
+        };
+        
+        // Show status message
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    statusEl.className = 'status-message';
+                }, 5000);
+            }
+        }
+
+        // Handle file selection
+        async function handleFileSelect() {
+            showStatus('Loading hz_all.csv...', 'info');
+            const response = await fetch('./惠州/hz_all.csv');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const content = await response.text();
+            processCSVData(content);
+        }
+        
+        // Process CSV data
+        function processCSVData(content) {
+            
+            const parsed = Papa.parse(content, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true
+            });
+            
+            allData = parsed.data.map(row => {
+                const datetime = new Date(row.DATE);
+                const staCode = String(row.staCode);
+                const stationInfo = stations[staCode] || { name: 'Unknown', type: 'Unknown' };
+                
+                return {
+                    datetime: datetime,
+                    station: staCode,
+                    stationName: stationInfo.name,
+                    stationType: stationInfo.type,
+                    temp: row.t || row.ec_t2m || 25,
+                    dewpoint: row.dt || row.ec_d2m || 20,
+                    pressure: row.p || row.sp || 1005,
+                    slp: row.slp || row.ec_msl || 1008,
+                    rh: row.rh || row.ec_rh || 85,
+                    precipitation: row.prec_1h || 0,
+                    visibility: row.vis_atf || 5000,
+                    ws: row.ws_2mi_avg || row.ec_ws || 5,
+                    ws10min: row.ws_10mi_avg || row.ws_2mi_avg || 5,
+                    wd: row.wd_2mi_avg || row.ec_wd || 180,
+                    pm25: row['PM2.5'] || 15,
+                    pm10: row.PM10 || 25,
+                    so2: row.SO2 || 10,
+                    no2: row.NO2 || 20,
+                    o3: row.O3 || 30,
+                    co: row.CO || 0.5,
+                    aqi: row.AQI || 50
+                };
+            });
+            
+            // Sort by datetime
+            allData.sort((a, b) => a.datetime - b.datetime);
+            
+            createAllCharts();
+            showStatus(`Successfully loaded ${allData.length} data points`, 'success');
+        }
+        
+        // Create all charts
+        function createAllCharts() {
+            createChart1(); // Multi-parameter time series (fixed)
+            createChart2(); // Precipitation-Visibility-PM2.5
+            createChart3(); // 3D phase space
+            createChart4(); // Wind rose
+            createChart5(); // Diurnal pattern
+            createChart6(); // Station comparison
+            createChart7(); // Precipitation accumulation
+            createChart9(); // Extreme value analysis (renumbered)
+            createChart10(); // Air quality response
+            createChart11(); // Wind vector map
+        }
+        
+        // Chart 1: Fixed Multi-parameter time series with station range
+        function createChart1() {
+            // Use 59298 (Huiyang) as main station
+            const mainStation = allData.filter(d => d.station === '59298');
+            if (mainStation.length === 0) {
+                // Fallback to first available station
+                const firstStation = Object.keys(stations)[0];
+                mainStation = allData.filter(d => d.station === firstStation);
+            }
+            if (mainStation.length === 0) return;
+            
+            const times = mainStation.map(d => d.datetime);
+            
+            // Calculate ranges from ALL stations (including 59298)
+            const ranges = {};
+            ['ws', 'temp', 'rh'].forEach(param => {
+                ranges[param] = times.map(time => {
+                    const timeData = allData.filter(d => 
+                        d.datetime.getTime() === time.getTime()
+                    );
+                    if (timeData.length === 0) return { min: null, max: null };
+                    const values = timeData.map(d => d[param]);
+                    return {
+                        min: Math.min(...values),
+                        max: Math.max(...values)
+                    };
+                });
+            });
+            
+            const traces = [];
+            
+            // Add range areas for wind speed
+            if (ranges.ws.some(r => r.min !== null)) {
+                traces.push({
+                    x: times,
+                    y: ranges.ws.map(r => r.min || 0),
+                    type: 'scatter',
+                    mode: 'lines',
+                    showlegend: false,
+                    line: { width: 0 },
+                    yaxis: 'y3'
+                });
+                traces.push({
+                    x: times,
+                    y: ranges.ws.map(r => r.max || 0),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'WS Range',
+                    fill: 'tonexty',
+                    fillcolor: 'rgba(76, 175, 80, 0.15)',
+                    line: { width: 0 },
+                    yaxis: 'y3',
+                    showlegend: false
+                });
+            }
+            
+            // Add range areas for temperature
+            if (ranges.temp.some(r => r.min !== null)) {
+                traces.push({
+                    x: times,
+                    y: ranges.temp.map(r => r.min || 0),
+                    type: 'scatter',
+                    mode: 'lines',
+                    showlegend: false,
+                    line: { width: 0 },
+                    yaxis: 'y4'
+                });
+                traces.push({
+                    x: times,
+                    y: ranges.temp.map(r => r.max || 0),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Temp Range',
+                    fill: 'tonexty',
+                    fillcolor: 'rgba(255, 152, 0, 0.15)',
+                    line: { width: 0 },
+                    yaxis: 'y4',
+                    showlegend: false
+                });
+            }
+            
+            // Add range areas for RH
+            if (ranges.rh.some(r => r.min !== null)) {
+                traces.push({
+                    x: times,
+                    y: ranges.rh.map(r => r.min || 0),
+                    type: 'scatter',
+                    mode: 'lines',
+                    showlegend: false,
+                    line: { width: 0 },
+                    yaxis: 'y5'
+                });
+                traces.push({
+                    x: times,
+                    y: ranges.rh.map(r => r.max || 0),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'RH Range',
+                    fill: 'tonexty',
+                    fillcolor: 'rgba(156, 39, 176, 0.15)',
+                    line: { width: 0 },
+                    yaxis: 'y5',
+                    showlegend: false
+                });
+            }
+            
+            // Main station data
+            traces.push({
+                x: times,
+                y: mainStation.map(d => d.precipitation),
+                type: 'bar',
+                name: 'Station 59298 Precip',
+                yaxis: 'y',
+                marker: { 
+                    color: mainStation.map(d => {
+                        if (d.precipitation > 50) return '#8b0000';
+                        if (d.precipitation > 25) return '#ff0000';
+                        if (d.precipitation > 10) return '#ffa500';
+                        return '#87ceeb';
+                    })
+                }
+            });
+            
+            traces.push({
+                x: times,
+                y: mainStation.map(d => d.pressure),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Pressure',
+                yaxis: 'y2',
+                line: { color: '#e91e63', width: 1.5 }
+            });
+            
+            traces.push({
+                x: times,
+                y: mainStation.map(d => d.ws),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Wind Speed',
+                yaxis: 'y3',
+                line: { color: '#4caf50', width: 1.5 }
+            });
+            
+            traces.push({
+                x: times,
+                y: mainStation.map(d => d.temp),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Temperature',
+                yaxis: 'y4',
+                line: { color: '#ff9800', width: 1.5 }
+            });
+            
+            traces.push({
+                x: times,
+                y: mainStation.map(d => d.rh),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'RH',
+                yaxis: 'y5',
+                line: { color: '#9c27b0', width: 1.2 }
+            });
+            
+            const layout = {
+                xaxis: { 
+                    title: 'Datetime',
+                    domain: [0.08, 0.84]  // Extended to use more screen
+                },
+                yaxis: {
+                    title: 'Precipitation (mm/h)',
+                    titlefont: { color: '#2196f3', size: 11 },
+                    tickfont: { color: '#2196f3', size: 9 },
+                    side: 'left',
+                    position: 0,
+                    range: [0, Math.max(...mainStation.map(d => d.precipitation)) * 1.1]
+                },
+                yaxis2: {
+                    title: 'Pressure (hPa)',
+                    titlefont: { color: '#e91e63', size: 11 },
+                    tickfont: { color: '#e91e63', size: 9 },
+                    overlaying: 'y',
+                    side: 'right',
+                    anchor: 'free',
+                    position: 0.84
+                },
+                yaxis3: {
+                    title: 'Wind (m/s)',
+                    titlefont: { color: '#4caf50', size: 11 },
+                    tickfont: { color: '#4caf50', size: 9 },
+                    overlaying: 'y',
+                    side: 'right',
+                    anchor: 'free',
+                    position: 0.88
+                },
+                yaxis4: {
+                    title: 'Temp (°C)',
+                    titlefont: { color: '#ff9800', size: 11 },
+                    tickfont: { color: '#ff9800', size: 9 },
+                    overlaying: 'y',
+                    side: 'right',
+                    anchor: 'free',
+                    position: 0.92
+                },
+                yaxis5: {
+                    title: 'RH (%)',
+                    titlefont: { color: '#9c27b0', size: 11 },
+                    tickfont: { color: '#9c27b0', size: 9 },
+                    overlaying: 'y',
+                    side: 'right',
+                    anchor: 'free',
+                    position: 0.96,
+                    range: [0, 100]
+                },
+                height: 600,
+                margin: { l: 80, r: 250, t: 50, b: 80 },
+                showlegend: true,
+                legend: {
+                    x: 0.5,
+                    y: -0.15,
+                    xanchor: 'center',
+                    orientation: 'h',
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    bordercolor: 'rgba(0,0,0,0.2)',
+                    borderwidth: 1
+                },
+                hovermode: 'x unified'
+            };
+            
+            Plotly.newPlot('chart1', traces, layout, {responsive: true});
+        }
+        
+        // Chart 2: Precipitation-Visibility-PM2.5 Relationship
+        function createChart2() {
+            const trace1 = {
+                x: allData.map(d => d.precipitation),
+                y: allData.map(d => d.visibility / 1000),
+                mode: 'markers',
+                type: 'scatter',
+                name: 'Precip vs Visibility',
+                marker: {
+                    size: allData.map(d => d.pm25 / 5),
+                    color: allData.map(d => d.rh),
+                    colorscale: 'Blues',
+                    showscale: true,
+                    colorbar: {
+                        title: 'RH (%)',
+                        x: 1.15,
+                        len: 0.5,
+                        y: 0.75
+                    },
+                    opacity: 0.6
+                },
+                text: allData.map(d => 
+                    `Station: ${d.stationName}<br>` +
+                    `Precip: ${d.precipitation.toFixed(1)} mm<br>` +
+                    `Vis: ${(d.visibility/1000).toFixed(1)} km<br>` +
+                    `PM2.5: ${d.pm25.toFixed(1)} μg/m³<br>` +
+                    `RH: ${d.rh.toFixed(1)}%`
+                ),
+                hovertemplate: '%{text}'
+            };
+            
+            // Add regression line
+            const x = allData.map(d => d.precipitation);
+            const y = allData.map(d => d.visibility / 1000);
+            const xMean = _.mean(x);
+            const yMean = _.mean(y);
+            const slope = _.sum(x.map((xi, i) => (xi - xMean) * (y[i] - yMean))) / 
+                         _.sum(x.map(xi => (xi - xMean) ** 2));
+            const intercept = yMean - slope * xMean;
+            
+            const xRange = [0, Math.max(...x)];
+            const trace2 = {
+                x: xRange,
+                y: xRange.map(xi => slope * xi + intercept),
+                mode: 'lines',
+                type: 'scatter',
+                name: 'Trend Line',
+                line: { color: 'red', width: 2, dash: 'dash' }
+            };
+            
+            const layout = {
+                xaxis: { title: 'Precipitation (mm/h)' },
+                yaxis: { title: 'Visibility (km)' },
+                height: 500,
+                margin: { l: 80, r: 200, t: 30, b: 60 },
+                legend: {
+                    x: 0.02,
+                    y: 0.98,
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    bordercolor: 'rgba(0,0,0,0.2)',
+                    borderwidth: 1
+                }
+            };
+            
+            Plotly.newPlot('chart2', [trace1, trace2], layout, {responsive: true});
+        }
+        
+        // Chart 3: 3D Phase Space
+        function createChart3() {
+            const trace = {
+                x: allData.map(d => d.rh),
+                y: allData.map(d => d.pressure),
+                z: allData.map(d => d.precipitation),
+                mode: 'markers',
+                marker: {
+                    size: 5,
+                    color: allData.map(d => d.temp),
+                    colorscale: 'Jet',
+                    showscale: true,
+                    colorbar: {
+                        title: 'Temperature (°C)',
+                        thickness: 15
+                    },
+                    opacity: 0.8
+                },
+                type: 'scatter3d',
+                text: allData.map(d => 
+                    `Station: ${d.stationName}<br>` +
+                    `RH: ${d.rh.toFixed(1)}%<br>` +
+                    `Pressure: ${d.pressure.toFixed(1)} hPa<br>` +
+                    `Precip: ${d.precipitation.toFixed(1)} mm/h<br>` +
+                    `Temp: ${d.temp.toFixed(1)}°C`
+                ),
+                hovertemplate: '%{text}'
+            };
+            
+            const layout = {
+                scene: {
+                    xaxis: { title: 'Relative Humidity (%)' },
+                    yaxis: { title: 'Pressure (hPa)' },
+                    zaxis: { title: 'Precipitation (mm/h)' },
+                    camera: {
+                        eye: { x: 1.5, y: -1.5, z: 1.5 }
+                    }
+                },
+                height: 550,
+                margin: { l: 0, r: 0, t: 0, b: 0 }
+            };
+            
+            Plotly.newPlot('chart3', [trace], layout, {responsive: true});
+        }
+        
+        // Chart 4: Wind Rose
+        function createChart4() {
+            const windData = allData.filter(d => d.ws > 0 && d.precipitation > 0);
+            const sectors = 16;
+            const sectorSize = 360 / sectors;
+            const roseBins = [];
+            
+            for (let i = 0; i < sectors; i++) {
+                const sectorStart = i * sectorSize;
+                const sectorEnd = (i + 1) * sectorSize;
+                const sectorData = windData.filter(d => d.wd >= sectorStart && d.wd < sectorEnd);
+                
+                if (sectorData.length > 0) {
+                    roseBins.push({
+                        direction: sectorStart + sectorSize / 2,
+                        avgPrecip: _.mean(sectorData.map(d => d.precipitation)),
+                        avgSpeed: _.mean(sectorData.map(d => d.ws)),
+                        count: sectorData.length
+                    });
+                }
+            }
+            
+            const trace = {
+                r: roseBins.map(b => b.avgPrecip),
+                theta: roseBins.map(b => b.direction),
+                type: 'barpolar',
+                marker: {
+                    color: roseBins.map(b => b.avgSpeed),
+                    colorscale: 'Viridis',
+                    showscale: true,
+                    colorbar: { 
+                        title: 'Wind Speed<br>(m/s)',
+                        x: 1.02
+                    }
+                },
+                text: roseBins.map(b => 
+                    `Dir: ${b.direction.toFixed(0)}°<br>` +
+                    `Precip: ${b.avgPrecip.toFixed(1)} mm/h<br>` +
+                    `Wind: ${b.avgSpeed.toFixed(1)} m/s`
+                ),
+                hovertemplate: '%{text}'
+            };
+            
+            const layout = {
+                polar: {
+                    radialaxis: { 
+                        visible: true,
+                        title: 'Avg Precipitation (mm/h)'
+                    },
+                    angularaxis: { 
+                        direction: 'clockwise', 
+                        rotation: 90 
+                    }
+                },
+                height: 500,
+                title: 'Wind Direction vs Precipitation'
+            };
+            
+            Plotly.newPlot('chart4', [trace], layout, {responsive: true});
+        }
+        
+        // Chart 5: Diurnal Pattern
+        function createChart5() {
+            const hourlyData = {};
+            for (let h = 0; h < 24; h++) {
+                hourlyData[h] = { precip: [], temp: [], rh: [], ws: [] };
+            }
+            
+            allData.forEach(d => {
+                const hour = d.datetime.getHours();
+                hourlyData[hour].precip.push(d.precipitation);
+                hourlyData[hour].temp.push(d.temp);
+                hourlyData[hour].rh.push(d.rh);
+                hourlyData[hour].ws.push(d.ws);
+            });
+            
+            const hours = Array.from({length: 24}, (_, i) => i);
+            
+            const traces = [
+                {
+                    x: hours,
+                    y: hours.map(h => _.mean(hourlyData[h].precip) || 0),
+                    type: 'bar',
+                    name: 'Precipitation',
+                    yaxis: 'y',
+                    marker: { color: 'rgba(33, 150, 243, 0.7)' }
+                },
+                {
+                    x: hours,
+                    y: hours.map(h => _.mean(hourlyData[h].temp) || 0),
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: 'Temperature',
+                    yaxis: 'y2',
+                    line: { color: '#ff5722', width: 2 }
+                },
+                {
+                    x: hours,
+                    y: hours.map(h => _.mean(hourlyData[h].rh) || 0),
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: 'RH',
+                    yaxis: 'y3',
+                    line: { color: '#4caf50', width: 2 }
+                }
+            ];
+            
+          const layout = {
+                xaxis: {
+                    title: 'Hour of Day',
+                    dtick: 3,
+                    domain: [0.08, 0.92]  // Add domain to make room for axes
+                },
+                yaxis: {
+                    title: 'Precipitation (mm/h)',
+                    titlefont: { color: '#2196f3' },
+                    tickfont: { color: '#2196f3' },
+                    side: 'left'
+                },
+                yaxis2: {
+                    title: 'Temperature (°C)',
+                    titlefont: { color: '#ff5722' },
+                    tickfont: { color: '#ff5722' },
+                    overlaying: 'y',
+                    side: 'right',
+                    anchor: 'x'  // Anchor to x axis
+                },
+                yaxis3: {
+                    title: 'RH (%)',
+                    titlefont: { color: '#4caf50' },
+                    tickfont: { color: '#4caf50' },
+                    overlaying: 'y',
+                    side: 'left',
+                    anchor: 'free',
+                    position: 0.0,  // Position at left edge
+                    offsetgroup: 2
+                },
+                height: 400,
+                margin: { l: 120, r: 80, t: 30, b: 60 }  // Increase left margin
+            };
+            
+            Plotly.newPlot('chart5', traces, layout, {responsive: true});
+        }
+        
+        // Chart 6: Station Comparison
+        function createChart6() {
+            const stationGroups = _.groupBy(allData, 'station');
+            const traces = [];
+            const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
+            
+            let colorIdx = 0;
+            for (const [staCode, data] of Object.entries(stationGroups)) {
+                const stationInfo = stations[staCode] || { name: 'Unknown' };
+                
+                traces.push({
+                    y: data.map(d => d.precipitation),
+                    type: 'box',
+                    name: stationInfo.name,
+                    marker: { color: colors[colorIdx % colors.length] },
+                    boxmean: 'sd'
+                });
+                colorIdx++;
+            }
+            
+            const layout = {
+                yaxis: { title: 'Precipitation (mm/h)' },
+                xaxis: { title: 'Station' },
+                height: 400
+            };
+            
+            Plotly.newPlot('chart6', traces, layout, {responsive: true});
+        }
+        
+        // Chart 7: Precipitation Accumulation
+        function createChart7() {
+            const mainStation = allData.filter(d => d.station === '59297' || d.station === Object.keys(stations)[0]);
+            if (mainStation.length === 0) return;
+            
+            const times = mainStation.map(d => d.datetime);
+            const precipitation = mainStation.map(d => d.precipitation);
+            
+            // Calculate cumulative precipitation
+            let cumulative = [];
+            let sum = 0;
+            for (let p of precipitation) {
+                sum += p;
+                cumulative.push(sum);
+            }
+            
+            // Intensity categories
+            const colors = precipitation.map(p => {
+                if (p >= 50) return '#8b0000';
+                if (p >= 25) return '#ff0000';
+                if (p >= 10) return '#ffa500';
+                if (p >= 2.5) return '#87ceeb';
+                return '#e0e0e0';
+            });
+            
+            const traces = [
+                {
+                    x: times,
+                    y: precipitation,
+                    type: 'bar',
+                    name: 'Hourly Precipitation',
+                    marker: { color: colors },
+                    yaxis: 'y'
+                },
+                {
+                    x: times,
+                    y: cumulative,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Cumulative',
+                    line: { color: '#1e3c72', width: 3 },
+                    yaxis: 'y2'
+                }
+            ];
+            
+            const layout = {
+                xaxis: { title: 'Datetime' },
+                yaxis: {
+                    title: 'Hourly Precipitation (mm)',
+                    titlefont: { color: '#ff0000' },
+                    tickfont: { color: '#ff0000' }
+                },
+                yaxis2: {
+                    title: 'Cumulative (mm)',
+                    titlefont: { color: '#1e3c72' },
+                    tickfont: { color: '#1e3c72' },
+                    overlaying: 'y',
+                    side: 'right'
+                },
+                height: 450,
+                margin: { l: 80, r: 80, t: 30, b: 60 }
+            };
+            
+            Plotly.newPlot('chart7', traces, layout, {responsive: true});
+        }
+        
+        // Chart 8: Hourly Heatmap
+        function createChart8() {
+            // Create hourly matrix for different parameters
+            const uniqueDates = [...new Set(allData.map(d => d.datetime.toDateString()))];
+            const parameters = ['Precipitation', 'Temperature', 'RH', 'Wind Speed', 'PM2.5'];
+            
+            const z = [];
+            parameters.forEach(param => {
+                const row = [];
+                for (let h = 0; h < 24; h++) {
+                    const hourData = allData.filter(d => d.datetime.getHours() === h);
+                    let value = 0;
+                    
+                    switch(param) {
+                        case 'Precipitation':
+                            value = _.mean(hourData.map(d => d.precipitation)) || 0;
+                            break;
+                        case 'Temperature':
+                            value = _.mean(hourData.map(d => d.temp)) || 0;
+                            break;
+                        case 'RH':
+                            value = _.mean(hourData.map(d => d.rh)) || 0;
+                            break;
+                        case 'Wind Speed':
+                            value = _.mean(hourData.map(d => d.ws)) || 0;
+                            break;
+                        case 'PM2.5':
+                            value = _.mean(hourData.map(d => d.pm25)) || 0;
+                            break;
+                    }
+                    row.push(value);
+                }
+                z.push(row);
+            });
+            
+            const trace = {
+                z: z,
+                x: Array.from({length: 24}, (_, i) => `${i}:00`),
+                y: parameters,
+                type: 'heatmap',
+                colorscale: 'YlOrRd',
+                colorbar: {
+                    title: 'Normalized<br>Value',
+                    thickness: 15
+                },
+                hovertemplate: 'Parameter: %{y}<br>Hour: %{x}<br>Value: %{z:.1f}<extra></extra>'
+            };
+            
+            const layout = {
+                xaxis: { 
+                    title: 'Hour of Day',
+                    dtick: 3
+                },
+                yaxis: { 
+                    title: 'Parameter',
+                    type: 'category'
+                },
+                height: 400
+            };
+            
+            Plotly.newPlot('chart8', [trace], layout, {responsive: true});
+        }
+        
+        // Chart 9: Extreme Value Analysis
+        function createChart9() {
+            const precipValues = allData.map(d => d.precipitation).filter(p => p > 0).sort((a, b) => a - b);
+            const windValues = allData.map(d => d.ws).sort((a, b) => a - b);
+            const visValues = allData.map(d => d.visibility / 1000).sort((a, b) => a - b);
+            
+            // Calculate percentiles
+            const percentiles = Array.from({length: 100}, (_, i) => i + 1);
+            
+            const getPercentileValues = (values) => {
+                return percentiles.map(p => {
+                    const idx = Math.floor((p / 100) * values.length);
+                    return values[Math.min(idx, values.length - 1)];
+                });
+            };
+            
+            const traces = [
+                {
+                    x: percentiles,
+                    y: getPercentileValues(precipValues),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Precipitation',
+                    line: { color: '#2196f3', width: 3 },
+                    yaxis: 'y'
+                },
+                {
+                    x: percentiles,
+                    y: getPercentileValues(windValues),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Wind Speed',
+                    line: { color: '#4caf50', width: 3 },
+                    yaxis: 'y2'
+                },
+                {
+                    x: percentiles,
+                    y: getPercentileValues(visValues),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Visibility',
+                    line: { color: '#ff9800', width: 3 },
+                    yaxis: 'y3'
+                }
+            ];
+            
+            const layout = {
+                xaxis: { 
+                    title: 'Percentile (%)',
+                    range: [0, 100],
+                    domain: [0, 0.85]
+                },
+                yaxis: {
+                    title: 'Precipitation (mm/h)',
+                    titlefont: { color: '#2196f3', size: 11 },
+                    tickfont: { color: '#2196f3', size: 10 },
+                    side: 'left'
+                },
+                yaxis2: {
+                    title: 'Wind Speed (m/s)',
+                    titlefont: { color: '#4caf50', size: 11 },
+                    tickfont: { color: '#4caf50', size: 10 },
+                    overlaying: 'y',
+                    side: 'right',
+                    anchor: 'free',
+                    position: 0.85
+                },
+                yaxis3: {
+                    title: 'Visibility (km)',
+                    titlefont: { color: '#ff9800', size: 11 },
+                    tickfont: { color: '#ff9800', size: 10 },
+                    overlaying: 'y',
+                    side: 'right',
+                    anchor: 'free',
+                    position: 0.95
+                },
+                height: 450,
+                margin: { l: 80, r: 180, t: 30, b: 60 },
+                shapes: [
+                    {
+                        type: 'line',
+                        x0: 95,
+                        x1: 95,
+                        y0: 0,
+                        y1: 1,
+                        yref: 'paper',
+                        line: { color: 'red', width: 2, dash: 'dash' }
+                    }
+                ],
+                annotations: [
+                    {
+                        x: 95,
+                        y: 0.9,
+                        yref: 'paper',
+                        text: '95th Percentile',
+                        showarrow: false,
+                        bgcolor: 'rgba(255,255,255,0.8)',
+                        bordercolor: 'red'
+                    }
+                ]
+            };
+            
+            Plotly.newPlot('chart9', traces, layout, {responsive: true});
+        }
+        
+        // Chart 10: Air Quality Response
+        function createChart10() {
+            const trace1 = {
+                x: allData.map(d => d.precipitation),
+                y: allData.map(d => d.pm25),
+                mode: 'markers',
+                type: 'scatter',
+                name: 'PM2.5',
+                marker: {
+                    size: 8,
+                    color: '#e74c3c',
+                    opacity: 0.6
+                }
+            };
+            
+            const trace2 = {
+                x: allData.map(d => d.precipitation),
+                y: allData.map(d => d.pm10),
+                mode: 'markers',
+                type: 'scatter',
+                name: 'PM10',
+                marker: {
+                    size: 8,
+                    color: '#3498db',
+                    opacity: 0.6
+                }
+            };
+            
+            const trace3 = {
+                x: allData.map(d => d.precipitation),
+                y: allData.map(d => d.aqi),
+                mode: 'markers',
+                type: 'scatter',
+                name: 'AQI',
+                marker: {
+                    size: 8,
+                    color: '#2ecc71',
+                    opacity: 0.6
+                },
+                yaxis: 'y2'
+            };
+            
+            const layout = {
+                xaxis: { title: 'Precipitation (mm/h)' },
+                yaxis: {
+                    title: 'Particulate Matter (μg/m³)',
+                    titlefont: { color: '#34495e' },
+                    tickfont: { color: '#34495e' }
+                },
+                yaxis2: {
+                    title: 'Air Quality Index',
+                    titlefont: { color: '#2ecc71' },
+                    tickfont: { color: '#2ecc71' },
+                    overlaying: 'y',
+                    side: 'right'
+                },
+                height: 450,
+                margin: { l: 80, r: 80, t: 30, b: 60 },
+                shapes: [
+                    {
+                        type: 'line',
+                        x0: 0,
+                        x1: Math.max(...allData.map(d => d.precipitation)),
+                        y0: 35,
+                        y1: 35,
+                        line: { color: 'green', width: 1, dash: 'dash' }
+                    },
+                    {
+                        type: 'line',
+                        x0: 0,
+                        x1: Math.max(...allData.map(d => d.precipitation)),
+                        y0: 75,
+                        y1: 75,
+                        line: { color: 'yellow', width: 1, dash: 'dash' }
+                    }
+                ],
+                annotations: [
+                    {
+                        x: 0.02,
+                        y: 35,
+                        xref: 'paper',
+                        text: 'Good',
+                        showarrow: false,
+                        bgcolor: 'rgba(0,255,0,0.1)'
+                    },
+                    {
+                        x: 0.02,
+                        y: 75,
+                        xref: 'paper',
+                        text: 'Moderate',
+                        showarrow: false,
+                        bgcolor: 'rgba(255,255,0,0.1)'
+                    }
+                ]
+            };
+            
+            Plotly.newPlot('chart10', [trace1, trace2, trace3], layout, {responsive: true});
+        }
+
+        // Chart 11: Wind Field Image Display
+        let animationInterval = null;
+        let currentFrame = 0;
+
+        function createChart11() {
+            // Initialize the image display
+            currentFrame = 0;
+            updateImage(0);
+        }
+
+        function updateImage(frameIndex) {
+            currentFrame = parseInt(frameIndex);
+            const paddedIndex = String(currentFrame).padStart(4, '0');
+            const imagePath = `./惠州/wind_field_maps/wind_field_${paddedIndex}.png`;
+
+            document.getElementById('windFieldImage').src = imagePath;
+            document.getElementById('timeSlider').value = currentFrame;
+
+            // Update time label based on frame
+            const startDate = new Date('2024-07-17T00:00:00');
+            const currentTime = new Date(startDate.getTime() + currentFrame * 60 * 60 * 1000); // Add hours
+            const timeStr = `${currentTime.getMonth()+1}/${currentTime.getDate()} ${String(currentTime.getHours()).padStart(2,'0')}:00`;
+            document.getElementById('timeLabel').textContent = `Time: ${timeStr}`;
+        }
+
+        function playAnimation() {
+            if (animationInterval) clearInterval(animationInterval);
+
+            animationInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame > 143) currentFrame = 0;
+                updateImage(currentFrame);
+            }, 200); // 200ms per frame
+        }
+
+        function pauseAnimation() {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
+        }
+        
+        // Initialize with synthetic data
+        window.onload = function() {
+            handleFileSelect();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+[
+  {
+    "index": 0,
+    "filename": "wind_field_0000.png",
+    "datetime": "2025-05-02 00:00"
+  },
+  {
+    "index": 1,
+    "filename": "wind_field_0001.png",
+    "datetime": "2025-05-02 01:00"
+  },
+  {
+    "index": 2,
+    "filename": "wind_field_0002.png",
+    "datetime": "2025-05-02 02:00"
+  },
+  {
+    "index": 3,
+    "filename": "wind_field_0003.png",
+    "datetime": "2025-05-02 03:00"
+  },
+  {
+    "index": 4,
+    "filename": "wind_field_0004.png",
+    "datetime": "2025-05-02 04:00"
+  },
+  {
+    "index": 5,
+    "filename": "wind_field_0005.png",
+    "datetime": "2025-05-02 05:00"
+  },
+  {
+    "index": 6,
+    "filename": "wind_field_0006.png",
+    "datetime": "2025-05-02 06:00"
+  },
+  {
+    "index": 7,
+    "filename": "wind_field_0007.png",
+    "datetime": "2025-05-02 07:00"
+  },
+  {
+    "index": 8,
+    "filename": "wind_field_0008.png",
+    "datetime": "2025-05-02 08:00"
+  },
+  {
+    "index": 9,
+    "filename": "wind_field_0009.png",
+    "datetime": "2025-05-02 09:00"
+  },
+  {
+    "index": 10,
+    "filename": "wind_field_0010.png",
+    "datetime": "2025-05-02 10:00"
+  },
+  {
+    "index": 11,
+    "filename": "wind_field_0011.png",
+    "datetime": "2025-05-02 11:00"
+  },
+  {
+    "index": 12,
+    "filename": "wind_field_0012.png",
+    "datetime": "2025-05-02 12:00"
+  },
+  {
+    "index": 13,
+    "filename": "wind_field_0013.png",
+    "datetime": "2025-05-02 13:00"
+  },
+  {
+    "index": 14,
+    "filename": "wind_field_0014.png",
+    "datetime": "2025-05-02 14:00"
+  },
+  {
+    "index": 15,
+    "filename": "wind_field_0015.png",
+    "datetime": "2025-05-02 15:00"
+  },
+  {
+    "index": 16,
+    "filename": "wind_field_0016.png",
+    "datetime": "2025-05-02 16:00"
+  },
+  {
+    "index": 17,
+    "filename": "wind_field_0017.png",
+    "datetime": "2025-05-02 17:00"
+  },
+  {
+    "index": 18,
+    "filename": "wind_field_0018.png",
+    "datetime": "2025-05-02 18:00"
+  },
+  {
+    "index": 19,
+    "filename": "wind_field_0019.png",
+    "datetime": "2025-05-02 19:00"
+  },
+  {
+    "index": 20,
+    "filename": "wind_field_0020.png",
+    "datetime": "2025-05-02 20:00"
+  },
+  {
+    "index": 21,
+    "filename": "wind_field_0021.png",
+    "datetime": "2025-05-02 21:00"
+  },
+  {
+    "index": 22,
+    "filename": "wind_field_0022.png",
+    "datetime": "2025-05-02 22:00"
+  },
+  {
+    "index": 23,
+    "filename": "wind_field_0023.png",
+    "datetime": "2025-05-02 23:00"
+  },
+  {
+    "index": 24,
+    "filename": "wind_field_0024.png",
+    "datetime": "2025-05-03 00:00"
+  },
+  {
+    "index": 25,
+    "filename": "wind_field_0025.png",
+    "datetime": "2025-05-03 01:00"
+  },
+  {
+    "index": 26,
+    "filename": "wind_field_0026.png",
+    "datetime": "2025-05-03 02:00"
+  },
+  {
+    "index": 27,
+    "filename": "wind_field_0027.png",
+    "datetime": "2025-05-03 03:00"
+  },
+  {
+    "index": 28,
+    "filename": "wind_field_0028.png",
+    "datetime": "2025-05-03 04:00"
+  },
+  {
+    "index": 29,
+    "filename": "wind_field_0029.png",
+    "datetime": "2025-05-03 05:00"
+  },
+  {
+    "index": 30,
+    "filename": "wind_field_0030.png",
+    "datetime": "2025-05-03 06:00"
+  },
+  {
+    "index": 31,
+    "filename": "wind_field_0031.png",
+    "datetime": "2025-05-03 07:00"
+  },
+  {
+    "index": 32,
+    "filename": "wind_field_0032.png",
+    "datetime": "2025-05-03 08:00"
+  },
+  {
+    "index": 33,
+    "filename": "wind_field_0033.png",
+    "datetime": "2025-05-03 09:00"
+  },
+  {
+    "index": 34,
+    "filename": "wind_field_0034.png",
+    "datetime": "2025-05-03 10:00"
+  },
+  {
+    "index": 35,
+    "filename": "wind_field_0035.png",
+    "datetime": "2025-05-03 11:00"
+  },
+  {
+    "index": 36,
+    "filename": "wind_field_0036.png",
+    "datetime": "2025-05-03 12:00"
+  },
+  {
+    "index": 37,
+    "filename": "wind_field_0037.png",
+    "datetime": "2025-05-03 13:00"
+  },
+  {
+    "index": 38,
+    "filename": "wind_field_0038.png",
+    "datetime": "2025-05-03 14:00"
+  },
+  {
+    "index": 39,
+    "filename": "wind_field_0039.png",
+    "datetime": "2025-05-03 15:00"
+  },
+  {
+    "index": 40,
+    "filename": "wind_field_0040.png",
+    "datetime": "2025-05-03 16:00"
+  },
+  {
+    "index": 41,
+    "filename": "wind_field_0041.png",
+    "datetime": "2025-05-03 17:00"
+  },
+  {
+    "index": 42,
+    "filename": "wind_field_0042.png",
+    "datetime": "2025-05-03 18:00"
+  },
+  {
+    "index": 43,
+    "filename": "wind_field_0043.png",
+    "datetime": "2025-05-03 19:00"
+  },
+  {
+    "index": 44,
+    "filename": "wind_field_0044.png",
+    "datetime": "2025-05-03 20:00"
+  },
+  {
+    "index": 45,
+    "filename": "wind_field_0045.png",
+    "datetime": "2025-05-03 21:00"
+  },
+  {
+    "index": 46,
+    "filename": "wind_field_0046.png",
+    "datetime": "2025-05-03 22:00"
+  },
+  {
+    "index": 47,
+    "filename": "wind_field_0047.png",
+    "datetime": "2025-05-03 23:00"
+  },
+  {
+    "index": 48,
+    "filename": "wind_field_0048.png",
+    "datetime": "2025-05-04 00:00"
+  },
+  {
+    "index": 49,
+    "filename": "wind_field_0049.png",
+    "datetime": "2025-05-04 01:00"
+  },
+  {
+    "index": 50,
+    "filename": "wind_field_0050.png",
+    "datetime": "2025-05-04 02:00"
+  },
+  {
+    "index": 51,
+    "filename": "wind_field_0051.png",
+    "datetime": "2025-05-04 03:00"
+  },
+  {
+    "index": 52,
+    "filename": "wind_field_0052.png",
+    "datetime": "2025-05-04 04:00"
+  },
+  {
+    "index": 53,
+    "filename": "wind_field_0053.png",
+    "datetime": "2025-05-04 05:00"
+  },
+  {
+    "index": 54,
+    "filename": "wind_field_0054.png",
+    "datetime": "2025-05-04 06:00"
+  },
+  {
+    "index": 55,
+    "filename": "wind_field_0055.png",
+    "datetime": "2025-05-04 07:00"
+  },
+  {
+    "index": 56,
+    "filename": "wind_field_0056.png",
+    "datetime": "2025-05-04 08:00"
+  },
+  {
+    "index": 57,
+    "filename": "wind_field_0057.png",
+    "datetime": "2025-05-04 09:00"
+  },
+  {
+    "index": 58,
+    "filename": "wind_field_0058.png",
+    "datetime": "2025-05-04 10:00"
+  },
+  {
+    "index": 59,
+    "filename": "wind_field_0059.png",
+    "datetime": "2025-05-04 11:00"
+  },
+  {
+    "index": 60,
+    "filename": "wind_field_0060.png",
+    "datetime": "2025-05-04 12:00"
+  },
+  {
+    "index": 61,
+    "filename": "wind_field_0061.png",
+    "datetime": "2025-05-04 13:00"
+  },
+  {
+    "index": 62,
+    "filename": "wind_field_0062.png",
+    "datetime": "2025-05-04 14:00"
+  },
+  {
+    "index": 63,
+    "filename": "wind_field_0063.png",
+    "datetime": "2025-05-04 15:00"
+  },
+  {
+    "index": 64,
+    "filename": "wind_field_0064.png",
+    "datetime": "2025-05-04 16:00"
+  },
+  {
+    "index": 65,
+    "filename": "wind_field_0065.png",
+    "datetime": "2025-05-04 17:00"
+  },
+  {
+    "index": 66,
+    "filename": "wind_field_0066.png",
+    "datetime": "2025-05-04 18:00"
+  },
+  {
+    "index": 67,
+    "filename": "wind_field_0067.png",
+    "datetime": "2025-05-04 19:00"
+  },
+  {
+    "index": 68,
+    "filename": "wind_field_0068.png",
+    "datetime": "2025-05-04 20:00"
+  },
+  {
+    "index": 69,
+    "filename": "wind_field_0069.png",
+    "datetime": "2025-05-04 21:00"
+  },
+  {
+    "index": 70,
+    "filename": "wind_field_0070.png",
+    "datetime": "2025-05-04 22:00"
+  },
+  {
+    "index": 71,
+    "filename": "wind_field_0071.png",
+    "datetime": "2025-05-04 23:00"
+  },
+  {
+    "index": 72,
+    "filename": "wind_field_0072.png",
+    "datetime": "2025-05-05 00:00"
+  },
+  {
+    "index": 73,
+    "filename": "wind_field_0073.png",
+    "datetime": "2025-05-05 01:00"
+  },
+  {
+    "index": 74,
+    "filename": "wind_field_0074.png",
+    "datetime": "2025-05-05 02:00"
+  },
+  {
+    "index": 75,
+    "filename": "wind_field_0075.png",
+    "datetime": "2025-05-05 03:00"
+  },
+  {
+    "index": 76,
+    "filename": "wind_field_0076.png",
+    "datetime": "2025-05-05 04:00"
+  },
+  {
+    "index": 77,
+    "filename": "wind_field_0077.png",
+    "datetime": "2025-05-05 05:00"
+  },
+  {
+    "index": 78,
+    "filename": "wind_field_0078.png",
+    "datetime": "2025-05-05 06:00"
+  },
+  {
+    "index": 79,
+    "filename": "wind_field_0079.png",
+    "datetime": "2025-05-05 07:00"
+  },
+  {
+    "index": 80,
+    "filename": "wind_field_0080.png",
+    "datetime": "2025-05-05 08:00"
+  },
+  {
+    "index": 81,
+    "filename": "wind_field_0081.png",
+    "datetime": "2025-05-05 09:00"
+  },
+  {
+    "index": 82,
+    "filename": "wind_field_0082.png",
+    "datetime": "2025-05-05 10:00"
+  },
+  {
+    "index": 83,
+    "filename": "wind_field_0083.png",
+    "datetime": "2025-05-05 11:00"
+  },
+  {
+    "index": 84,
+    "filename": "wind_field_0084.png",
+    "datetime": "2025-05-05 12:00"
+  },
+  {
+    "index": 85,
+    "filename": "wind_field_0085.png",
+    "datetime": "2025-05-05 13:00"
+  },
+  {
+    "index": 86,
+    "filename": "wind_field_0086.png",
+    "datetime": "2025-05-05 14:00"
+  },
+  {
+    "index": 87,
+    "filename": "wind_field_0087.png",
+    "datetime": "2025-05-05 15:00"
+  },
+  {
+    "index": 88,
+    "filename": "wind_field_0088.png",
+    "datetime": "2025-05-05 16:00"
+  },
+  {
+    "index": 89,
+    "filename": "wind_field_0089.png",
+    "datetime": "2025-05-05 17:00"
+  },
+  {
+    "index": 90,
+    "filename": "wind_field_0090.png",
+    "datetime": "2025-05-05 18:00"
+  },
+  {
+    "index": 91,
+    "filename": "wind_field_0091.png",
+    "datetime": "2025-05-05 19:00"
+  },
+  {
+    "index": 92,
+    "filename": "wind_field_0092.png",
+    "datetime": "2025-05-05 20:00"
+  },
+  {
+    "index": 93,
+    "filename": "wind_field_0093.png",
+    "datetime": "2025-05-05 21:00"
+  },
+  {
+    "index": 94,
+    "filename": "wind_field_0094.png",
+    "datetime": "2025-05-05 22:00"
+  },
+  {
+    "index": 95,
+    "filename": "wind_field_0095.png",
+    "datetime": "2025-05-05 23:00"
+  }
+]

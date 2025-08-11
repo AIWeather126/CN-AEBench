@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherAirSN Dataset - Atmospheric Consistency Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-title {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, #ffffff, #a8d8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 10px rgba(168, 216, 255, 0.5));
+            }
+            to {
+                filter: drop-shadow(0 0 20px rgba(168, 216, 255, 0.8));
+            }
+        }
+
+        .subtitle {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 15px;
+            color: #b8d4f1;
+            letter-spacing: 1px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #d1e3f4;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Dataset Info Cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 1s ease;
+            animation-fill-mode: both;
+        }
+
+        .info-card:nth-child(1) { animation-delay: 0.1s; }
+        .info-card:nth-child(2) { animation-delay: 0.2s; }
+        .info-card:nth-child(3) { animation-delay: 0.3s; }
+        .info-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-card-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .info-card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .info-card-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #2a5298;
+            margin-bottom: 5px;
+        }
+
+        .info-card-desc {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Case Studies Section */
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .case-studies {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .case-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            animation: fadeInUp 1s ease;
+            animation-fill-mode: both;
+        }
+
+        .case-card:nth-child(1) { animation-delay: 0.5s; }
+        .case-card:nth-child(2) { animation-delay: 0.6s; }
+        .case-card:nth-child(3) { animation-delay: 0.7s; }
+
+        .case-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .case-card-header {
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .case-card:nth-child(1) .case-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .case-card:nth-child(2) .case-card-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+
+        .case-card:nth-child(3) .case-card-header {
+            background: linear-gradient(135deg, #8B7355 0%, #DEB887 100%);
+        }
+
+        .case-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .case-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .case-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+        }
+
+        .case-card-body {
+            padding: 25px;
+        }
+
+        .case-info {
+            margin-bottom: 20px;
+        }
+
+        .case-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .case-info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .case-info-value {
+            color: #333;
+        }
+
+        .case-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .case-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .case-card:nth-child(2) .case-btn {
+            background: linear-gradient(135deg, #010d23 0%, #303c51 100%);
+        }
+
+        .case-card:nth-child(3) .case-btn {
+            background: linear-gradient(135deg, #8B7355 0%, #DEB887 100%);
+        }
+
+        .case-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 80px;
+        }
+
+        .footer-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .footer-text {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .tech-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tech-badge {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 18px;
+            }
+
+            .case-studies {
+                grid-template-columns: 1fr;
+            }
+
+            .info-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .info-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <script>
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                document.querySelector('.bg-animation').appendChild(particle);
+            }
+        </script>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="main-title">WeatherAirSN Dataset</h1>
+<!--            <h2 class="subtitle">Atmospheric Consistency Validation System</h2>-->
+            <div class="description">
+                <p>
+                    <strong>WeatherAirSN</strong> is a comprehensive multi-source atmospheric dataset integrating
+                    ground observations, air quality monitoring, and ECMWF model data. This visualization platform
+                    demonstrates the dataset's reliability and consistency through three representative extreme
+                    weather events across different climate zones in China, validating the data quality and
+                    applicability for atmospheric research and machine learning applications.
+                </p>
+            </div>
+        </header>
+
+        <!-- Dataset Info Cards -->
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-card-icon">📊</div>
+                <div class="info-card-title">Data Coverage</div>
+                <div class="info-card-value">2023-2025-Future</div>
+                <div class="info-card-desc">Fresh data, updated continuously</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">🌍</div>
+                <div class="info-card-title">Stations</div>
+                <div class="info-card-value">2,250+</div>
+                <div class="info-card-desc">Nationwide coverage across China</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">🔬</div>
+                <div class="info-card-title">Parameters</div>
+                <div class="info-card-value">35+</div>
+                <div class="info-card-desc">Meteorological & air quality & EC-NWP variables</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">⏱️</div>
+                <div class="info-card-title">Resolution</div>
+                <div class="info-card-value">1 Hour</div>
+                <div class="info-card-desc">High temporal resolution data</div>
+            </div>
+        </div>
+
+        <!-- Case Studies Section -->
+        <section>
+            <h2 class="section-title">Case Studies: Extreme Weather Events</h2>
+
+            <div class="case-studies">
+                <!-- Zhengzhou Case -->
+                <div class="case-card" onclick="window.location.href='./zhengzhou_page.html'">
+                    <div class="case-card-header">
+                        <div class="case-icon">🌫️</div>
+                        <h3 class="case-title">Zhengzhou</h3>
+                        <p class="case-subtitle">Severe Fog-Haze Event</p>
+                    </div>
+                    <div class="case-card-body">
+                        <div class="case-info">
+                            <div class="case-info-item">
+                                <span class="case-info-label">Event Date:</span>
+                                <span class="case-info-value">Dec 25-31, 2023</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Event Type:</span>
+                                <span class="case-info-value">Fog-Haze Transition</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Max PM2.5:</span>
+                                <span class="case-info-value">&gt; 200 μg/m³</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Min Visibility:</span>
+                                <span class="case-info-value">&lt; 1 km</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Stations:</span>
+                                <span class="case-info-value">8 stations</span>
+                            </div>
+                        </div>
+                        <p class="case-description">
+                            Analysis of severe winter fog-haze pollution event in North China Plain,
+                            demonstrating the dataset's capability to capture complex atmospheric
+                            processes and aerosol-meteorology interactions.
+                        </p>
+                        <a href="./zhengzhou_page.html" class="case-btn">
+                            View Visualization →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Huizhou Case -->
+                <div class="case-card" onclick="window.location.href='./huizhou_page.html'">
+                    <div class="case-card-header">
+                        <div class="case-icon">🌧️</div>
+                        <h3 class="case-title">Huizhou</h3>
+                        <p class="case-subtitle">Extreme Rainstorm & Typhoon</p>
+                    </div>
+                    <div class="case-card-body">
+                        <div class="case-info">
+                            <div class="case-info-item">
+                                <span class="case-info-label">Event Date:</span>
+                                <span class="case-info-value">Jul 17-22, 2024</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Event Type:</span>
+                                <span class="case-info-value">Convective Rainstorm</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Max Wind Speed:</span>
+                                <span class="case-info-value">&gt; 12 m/s</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Warning Level:</span>
+                                <span class="case-info-value">Red Alert</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Stations:</span>
+                                <span class="case-info-value">4 stations</span>
+                            </div>
+                        </div>
+                        <p class="case-description">
+                            Investigation of extreme precipitation & typhoon event in South China coastal region,
+                            showcasing the dataset's ability to capture severe convective weather
+                            systems and their environmental impacts.
+                        </p>
+                        <a href="./huizhou_page.html" class="case-btn">
+                            View Visualization →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Hetian Case -->
+                <div class="case-card" onclick="window.location.href='./hetian_page.html'">
+                    <div class="case-card-header">
+                        <div class="case-icon">🌪️</div>
+                        <h3 class="case-title">Hetian</h3>
+                        <p class="case-subtitle">Dust Storm Event</p>
+                    </div>
+                    <div class="case-card-body">
+                        <div class="case-info">
+                            <div class="case-info-item">
+                                <span class="case-info-label">Event Date:</span>
+                                <span class="case-info-value">May 1-7, 2025</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Event Type:</span>
+                                <span class="case-info-value">Sand-Dust Storm</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Max PM10:</span>
+                                <span class="case-info-value">&gt; 1000 μg/m³</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Warning Level:</span>
+                                <span class="case-info-value">Orange Alert</span>
+                            </div>
+                            <div class="case-info-item">
+                                <span class="case-info-label">Stations:</span>
+                                <span class="case-info-value">6 stations</span>
+                            </div>
+                        </div>
+                        <p class="case-description">
+                            Examination of severe dust storm at Taklamakan Desert edge,
+                            validating the dataset's performance in extreme arid conditions
+                            and dust aerosol monitoring capabilities.
+                        </p>
+                        <a href="./hetian_page.html" class="case-btn">
+                            View Visualization →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+<!--        &lt;!&ndash; Footer &ndash;&gt;-->
+<!--        <footer class="footer">-->
+<!--            <div class="footer-title">Technical Implementation</div>-->
+<!--            <div class="footer-text">-->
+<!--                This visualization platform demonstrates the consistency between ground observations, -->
+<!--                air quality monitoring networks, and ECMWF reanalysis data within the WeatherAirSN dataset.-->
+<!--                Each case study validates data reliability under extreme atmospheric conditions.-->
+<!--            </div>-->
+<!--            <div class="tech-badges">-->
+<!--                <span class="tech-badge">Ground Observations</span>-->
+<!--                <span class="tech-badge">Air Quality Network</span>-->
+<!--                <span class="tech-badge">ECMWF ERA5</span>-->
+<!--                <span class="tech-badge">Real-time Validation</span>-->
+<!--                <span class="tech-badge">Multi-source Fusion</span>-->
+<!--            </div>-->
+<!--        </footer>-->
+    </div>
+</body>
+</html>

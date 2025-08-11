@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Fog-Haze Transition Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        .criteria-box {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+        .criteria-title {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .criteria-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .color-indicator {
+            width: 40px;
+            height: 30px;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+
+        .station-info-box {
+            background: linear-gradient(145deg, #f0f4f8, #d9e2ec);
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .station-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .station-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .station-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .station-name {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .station-type {
+            font-size: 12px;
+            color: #7f8c8d;
+            display: inline-block;
+            padding: 2px 8px;
+            background: #ecf0f1;
+            border-radius: 12px;
+            margin-top: 5px;
+        }
+
+        .warning-box {
+            background: linear-gradient(145deg, #fff5f5, #ffe0e0);
+            border-left: 6px solid;
+            border-image: linear-gradient(180deg, #ff6b6b, #ff8e53) 1;
+            padding: 25px;
+            margin-bottom: 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.15);
+        }
+
+        .warning-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .warning-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .warning-item.red {
+            background: linear-gradient(145deg, #ffebee, #ffcdd2);
+            border-left: 4px solid #d32f2f;
+        }
+
+        .warning-item.orange {
+            background: linear-gradient(145deg, #fff3e0, #ffe0b2);
+            border-left: 4px solid #f57c00;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .chart-container {
+            background: #fafafa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 15px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .file-input-label:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+        }
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Comprehensive Fog-Haze Transition Analysis</h1>
+        <div class="subtitle">Zhengzhou | December 25-31, 2023</div>
+        
+        <!-- Fog-Haze Criteria -->
+        <div class="criteria-box">
+<!--            <div class="criteria-title">🌫️ Fog-Haze-Mist Classification Criteria (QX/T 113-2010 Standard)</div>-->
+            <div class="criteria-grid">
+                <div class="criteria-item">
+                    <div class="color-indicator" style="background: #3498db;"></div>
+                    <div>
+                        <strong>Fog:</strong><br>
+                        RH ≥ 95%, Visibility < 5 km
+                    </div>
+                </div>
+                <div class="criteria-item">
+                    <div class="color-indicator" style="background: #9b59b6;"></div>
+                    <div>
+                        <strong>Mist:</strong><br>
+                        80% ≤ RH < 95%, Visibility < 5 km
+                    </div>
+                </div>
+                <div class="criteria-item">
+                    <div class="color-indicator" style="background: #e74c3c;"></div>
+                    <div>
+                        <strong>Haze:</strong><br>
+                        RH < 80%, Visibility < 5 km, PM2.5 > 75 μg/m³
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <!-- Station Information Box -->
+        <div class="station-info-box">
+            <div class="criteria-title">
+                <span>📍</span>
+                <span>Meteorological Station Network</span>
+            </div>
+            <div class="station-grid">
+                <div class="station-item">
+                    <div class="station-name">巩义 (Gongyi)</div>
+                    <div>Station: 57080</div>
+                    <div>Lon: 112.98°E, Lat: 34.81°N, Alt: 251.1m</div>
+                    <div class="station-type">旱地 (Dryland)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">荥阳 (Xingyang)</div>
+                    <div>Station: 57081</div>
+                    <div>Lon: 113.40°E, Lat: 34.79°N, Alt: 140.9m</div>
+                    <div class="station-type">城镇用地 (Urban)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">登封 (Dengfeng)</div>
+                    <div>Station: 57082</div>
+                    <div>Lon: 113.11°E, Lat: 34.49°N, Alt: 413.2m</div>
+                    <div class="station-type">旱地 (Dryland)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">郑州 (Zhengzhou)</div>
+                    <div>Station: 57083</div>
+                    <div>Lon: 113.66°E, Lat: 34.71°N, Alt: 110.4m</div>
+                    <div class="station-type">城镇用地 (Urban)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">嵩山 (Songshan)</div>
+                    <div>Station: 57084</div>
+                    <div>Lon: 113.05°E, Lat: 34.49°N, Alt: 1178.4m</div>
+                    <div class="station-type">有林地 (Forest)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">新密 (Xinmi)</div>
+                    <div>Station: 57085</div>
+                    <div>Lon: 113.34°E, Lat: 34.54°N, Alt: 259.9m</div>
+                    <div class="station-type">城镇用地 (Urban)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">新郑 (Xinzheng)</div>
+                    <div>Station: 57086</div>
+                    <div>Lon: 113.72°E, Lat: 34.38°N, Alt: 116.6m</div>
+                    <div class="station-type">农村居民点 (Rural)</div>
+                </div>
+                <div class="station-item">
+                    <div class="station-name">中牟 (Zhongmu)</div>
+                    <div>Station: 57090</div>
+                    <div>Lon: 114.04°E, Lat: 34.74°N, Alt: 80.6m</div>
+                    <div class="station-type">农村居民点 (Rural)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warning Information Box -->
+        <div class="warning-box">
+            <div class="criteria-title">
+                <span>🚨</span>
+                <span>Meteorological Warning Information</span>
+            </div>
+            <div class="warning-grid">
+                <div class="warning-item red">
+                    <strong>December 28, 2023</strong><br>
+                    🔴 Severe Fog-Haze Warning<br>
+                </div>
+                <div class="warning-item orange">
+                    <strong>December 29-30, 2023</strong><br>
+                    🟠 Heavy Fog Alert<br>
+                </div>
+            </div>
+        </div>
+        
+        <!-- All Charts in Single Page -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 1. Station 57083 Visibility Analysis with Multi-Station Range and EC Model</div>
+            <div id="chart1" style="height: 500px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 2. Fog-Haze-Mist Transition: Multi-Parameter Analysis</div>
+            <div id="chart2" style="height: 500px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 3. Three-Dimensional Fog-Haze Phase Space with Meteorological Constraints</div>
+            <div id="chart3d" style="height: 550px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 4. Wind Rose with PM2.5 Concentration</div>
+            <div id="chartWindRose" style="height: 500px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 5. Aerosol Size Distribution (PM2.5/PM10 Ratio)</div>
+            <div id="chartRatio" style="height: 450px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 6. Integrated Fog-Haze Transition Mechanism Diagram</div>
+            <div id="chartMechanism" style="height: 500px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 7. Spatiotemporal PM2.5 Evolution with RH Contours</div>
+            <div id="chart7" style="height: 450px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 8. 3D Phase Space: Multi-Station Dynamics</div>
+            <div id="chart8" style="height: 550px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 9. Vertical Profile Analysis</div>
+            <div id="chart9" style="height: 500px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 10. Diurnal Variation Patterns</div>
+            <div id="chart10" style="height: 500px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 11. RH-PM2.5-PM10 Relationship Analysis</div>
+            <div id="chart11" style="height: 500px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 12. Multi-Pollutant Correlation Matrix</div>
+            <div id="chart12" style="height: 550px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 13. Model vs Observation Comparison</div>
+            <div id="chart13" style="height: 450px;"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">Figure 14. AQI Distribution and Health Impact</div>
+            <div id="chart14" style="height: 400px;"></div>
+        </div>
+
+    <!-- Chart 15: Wind-Visibility Field Map -->
+        <div class="chart-container">
+            <div class="chart-title">Figure 15. Wind Field and Visibility Distribution Map</div>
+            <div id="chart15" style="height: 550px; position: relative;">
+                <img id="windFieldImage" src="" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
+                <div id="imageControls" style="text-align: center; margin-top: 10px;">
+                    <button onclick="playAnimation()" style="margin: 5px;">▶ Play</button>
+                    <button onclick="pauseAnimation()" style="margin: 5px;">⏸ Pause</button>
+                    <input type="range" id="timeSlider" min="0" max="167" value="0" style="width: 80%; margin: 10px;" oninput="updateImage(this.value)">
+                    <div id="timeLabel" style="font-weight: bold; margin-top: 5px;">Time: Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allData = [];
+        let processedData = {};
+        
+        // Station information
+        const stations = [
+            {name: 'Gongyi', code: '57080', lon: 112.98, lat: 34.81, alt: 251.1, type: 'Dryland'},
+            {name: 'Xingyang', code: '57081', lon: 113.40, lat: 34.79, alt: 140.9, type: 'Urban'},
+            {name: 'Dengfeng', code: '57082', lon: 113.11, lat: 34.49, alt: 413.2, type: 'Dryland'},
+            {name: 'Zhengzhou', code: '57083', lon: 113.66, lat: 34.71, alt: 110.4, type: 'Urban'},
+            {name: 'Songshan', code: '57084', lon: 113.05, lat: 34.49, alt: 1178.4, type: 'Forest'},
+            {name: 'Xinmi', code: '57085', lon: 113.34, lat: 34.54, alt: 259.9, type: 'Urban'},
+            {name: 'Xinzheng', code: '57086', lon: 113.72, lat: 34.38, alt: 116.6, type: 'Rural'},
+            {name: 'Zhongmu', code: '57090', lon: 114.04, lat: 34.74, alt: 80.6, type: 'Rural'}
+        ];
+        
+        // Classification function with updated criteria
+        function classifyCondition(rh, pm25, visibility) {
+            if (visibility >= 5000) return 'Clear';
+            if (rh >= 95 && visibility < 5000) return 'Fog';
+            if (rh >= 80 && rh < 95 && visibility < 5000) return 'Mist';
+            if (rh < 80 && pm25 > 75 && visibility < 5000) return 'Haze';
+            if (rh < 80 && pm25 <= 75 && visibility < 5000) return 'Clear';
+            return 'Clear'; // Default to Clear for other cases
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    statusEl.className = 'status-message';
+                }, 5000);
+            }
+        }
+        
+        // Read file function
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const extension = file.name.split('.').pop().toLowerCase();
+                    
+                    try {
+                        if (extension === 'csv') {
+                            const parsed = Papa.parse(content, {
+                                header: true,
+                                dynamicTyping: true,
+                                skipEmptyLines: true,
+                                delimitersToGuess: [',', '\t', '|', ';']
+                            });
+                            
+                            // Clean headers and data
+                            const cleanedData = parsed.data.map(row => {
+                                const cleanRow = {};
+                                for (let key in row) {
+                                    const cleanKey = key.trim();
+                                    cleanRow[cleanKey] = row[key];
+                                }
+                                return cleanRow;
+                            });
+                            
+                            console.log('CSV parsed successfully:', cleanedData.length, 'rows');
+                            console.log('Sample row:', cleanedData[0]);
+                            resolve(cleanedData);
+                        } else if (['xlsx', 'xls'].includes(extension)) {
+                            const workbook = XLSX.read(content, { type: 'binary' });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            const data = XLSX.utils.sheet_to_json(firstSheet);
+                            console.log('Excel parsed successfully:', data.length, 'rows');
+                            resolve(data);
+                        } else {
+                            reject(new Error('Unsupported file format'));
+                        }
+                    } catch (parseError) {
+                        console.error('Parse error:', parseError);
+                        reject(parseError);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    reject(new Error('Failed to read file'));
+                };
+                
+                if (['xlsx', 'xls'].includes(file.name.split('.').pop().toLowerCase())) {
+                    reader.readAsBinaryString(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            });
+        }
+        
+        // Process data
+        function processData() {
+            processedData = {
+                byStation: _.groupBy(allData, 'station'),
+                byHour: _.groupBy(allData, d => d.datetime.getHours()),
+                zhengzhou: allData.filter(d => d.station === '57083' || d.stationName === 'Zhengzhou')
+            };
+            
+            // If no Zhengzhou data found, use first available station
+            if (processedData.zhengzhou.length === 0 && allData.length > 0) {
+                const firstStation = allData[0].station;
+                processedData.zhengzhou = allData.filter(d => d.station === firstStation);
+                console.log(`No data for station 57083, using station ${firstStation} instead`);
+            }
+        }
+        
+        // Create all charts
+        function createAllCharts() {
+            createChart1();
+            createChart2();
+            createChart3D();
+            createWindRose();
+            createRatioPlot();
+            createMechanismDiagram();
+            createChart7();
+            createChart8();
+            createChart9();
+            createChart10();
+            createChart11();
+            createChart12();
+            createChart13();
+            createChart14();
+            createChart15();
+        }
+        
+        // Chart 1: Visibility comparison
+        function createChart1() {
+            const zhengzhouData = processedData.zhengzhou;
+            if (!zhengzhouData || zhengzhouData.length === 0) return;
+
+            const times = zhengzhouData.map(d => d.datetime);
+
+            const visRange = times.map((time, idx) => {
+                const timeData = allData.filter(d =>
+                    d.datetime.getTime() === time.getTime()
+                );
+                const visValues = timeData.map(d => d.visibility / 1000); // Convert to km
+                // Include station 57083 in the range
+                visValues.push(zhengzhouData[idx].vis_atf / 1000);
+                return {
+                    min: Math.min(...visValues),
+                    max: Math.max(...visValues)
+                };
+            });
+
+            const traces = [
+                {
+                    x: times,
+                    y: visRange.map(r => r.min),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'All Stations Min',
+                    line: { width: 0, color: 'rgba(30, 58, 138, 0)' },
+                    showlegend: false,
+                    hoverinfo: 'skip'
+                },
+                {
+                    x: times,
+                    y: visRange.map(r => r.max),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'All Stations Range',
+                    line: { width: 0, color: 'rgba(30, 58, 138, 0)' },
+                    fill: 'tonexty',
+                    fillcolor: 'rgba(30, 58, 138, 0.15)',
+                    showlegend: false,
+                    hoverinfo: 'skip'
+                },
+                {
+                    x: times,
+                    y: zhengzhouData.map(d => d.vis_atf / 1000),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Station 57083 Vis_ATF',
+                    line: { color: '#1e3a8a', width: 3 },
+                    yaxis: 'y'
+                },
+                {
+                    x: times,
+                    y: zhengzhouData.map(d => d.ec_vis / 1000),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EC Model Visibility',
+                    line: { color: '#9b59b6', width: 2, dash: 'dash' },
+                    yaxis: 'y'
+                },
+                {
+                    x: times,
+                    y: zhengzhouData.map(d => d.temp),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Observed T',
+                    line: { color: '#f39c12', width: 2 },
+                    yaxis: 'y2'
+                },
+                {
+                    x: times,
+                    y: zhengzhouData.map(d => d.ec_t2m),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EC T2m',
+                    line: { color: '#e67e22', width: 2, dash: 'dot' },
+                    yaxis: 'y2'
+                }
+            ];
+
+            const layout = {
+                xaxis: { title: 'Datetime', tickformat: '%m/%d %H:00' },
+                yaxis: {
+                    title: 'Visibility (km)',
+                    titlefont: { color: '#1e3a8a' },
+                    tickfont: { color: '#1e3a8a' }
+                },
+                yaxis2: {
+                    title: 'Temperature (°C)',
+                    titlefont: { color: '#f39c12' },
+                    tickfont: { color: '#f39c12' },
+                    overlaying: 'y',
+                    side: 'right'
+                },
+                height: 500,
+                margin: { l: 80, r: 80, t: 30, b: 60 },
+                legend: { x: 0.5, y: 1.1, xanchor: 'center', orientation: 'h' },
+                hovermode: 'x unified'
+            };
+
+            Plotly.newPlot('chart1', traces, layout, {responsive: true});
+        }
+        
+        // Chart 2: Fog-Haze transition
+        function createChart2() {
+            const zhengzhouData = processedData.zhengzhou;
+            if (!zhengzhouData || zhengzhouData.length === 0) return;
+            
+            const times = zhengzhouData.map(d => d.datetime);
+            const tMinusTd = zhengzhouData.map(d => d.temp - d.dewpoint);
+            
+            const shapes = [];
+            zhengzhouData.forEach((d, i) => {
+                const condition = classifyCondition(d.rh, d.pm25, d.visibility);
+                let color;
+                if (condition === 'Fog') color = 'rgba(52, 152, 219, 0.2)';
+                else if (condition === 'Haze') color = 'rgba(231, 76, 60, 0.2)';
+                else if (condition === 'Mist') color = 'rgba(155, 89, 182, 0.2)';
+                
+                if (color) {
+                    shapes.push({
+                        type: 'rect',
+                        xref: 'x',
+                        yref: 'paper',
+                        x0: d.datetime,
+                        x1: new Date(d.datetime.getTime() + 3600000),
+                        y0: 0,
+                        y1: 1,
+                        fillcolor: color,
+                        line: { width: 0 }
+                    });
+                }
+            });
+            
+            const traces = [
+                {
+                    x: times,
+                    y: zhengzhouData.map(d => d.vis_atf / 1000),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Visibility',
+                    yaxis: 'y',
+                    line: { color: '#2c3e50', width: 2 }
+                },
+                {
+                    x: times,
+                    y: zhengzhouData.map(d => d.rh),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'RH (%)',
+                    yaxis: 'y2',
+                    line: { color: '#3498db', width: 1.5 }
+                },
+                {
+                    x: times,
+                    y: tMinusTd,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'T-Td (°C)',
+                    yaxis: 'y3',
+                    line: { color: '#9b59b6', width: 1.5 }
+                },
+                {
+                    x: times,
+                    y: zhengzhouData.map(d => d.pm25),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'PM2.5',
+                    yaxis: 'y4',
+                    line: { color: '#e74c3c', width: 1.5 }
+                },
+                {
+                    x: times,
+                    y: zhengzhouData.map(d => d.pm10),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'PM10',
+                    yaxis: 'y5',
+                    line: { color: '#e67e22', width: 1.5 }
+                }
+            ];
+            
+            const layout = {
+                xaxis: { 
+                    title: 'Datetime', 
+                    tickformat: '%m/%d %H:00',
+                    domain: [0.22, 0.78]  // Constrain x-axis to leave room for y-axes
+                },
+                yaxis: { 
+                    title: 'Visibility (km)', 
+                    titlefont: { color: '#2c3e50', size: 11 },
+                    tickfont: { color: '#2c3e50', size: 10 },
+                    side: 'left',
+                    showgrid: false,
+                    position: 0.0
+                },
+                yaxis2: { 
+                    title: 'RH (%)', 
+                    titlefont: { color: '#3498db', size: 11 },
+                    tickfont: { color: '#3498db', size: 10 },
+                    overlaying: 'y', 
+                    side: 'left',
+                    anchor: 'free',
+                    position: 0.08,
+                    showgrid: false
+                },
+                yaxis3: { 
+                    title: 'T-Td (°C)', 
+                    titlefont: { color: '#9b59b6', size: 11 },
+                    tickfont: { color: '#9b59b6', size: 10 },
+                    overlaying: 'y', 
+                    side: 'left',
+                    anchor: 'free',
+                    position: 0.16,
+                    showgrid: false
+                },
+                yaxis4: { 
+                    title: 'PM2.5 (μg/m³)', 
+                    titlefont: { color: '#e74c3c', size: 11 },
+                    tickfont: { color: '#e74c3c', size: 10 },
+                    overlaying: 'y', 
+                    side: 'right',
+                    anchor: 'free',
+                    position: 0.78,
+                    showgrid: false
+                },
+                yaxis5: { 
+                    title: 'PM10 (μg/m³)', 
+                    titlefont: { color: '#e67e22', size: 11 },
+                    tickfont: { color: '#e67e22', size: 10 },
+                    overlaying: 'y', 
+                    side: 'right',
+                    anchor: 'free',
+                    position: 0.86,
+                    showgrid: false
+                },
+                height: 500,
+                margin: { l: 220, r: 140, t: 50, b: 60 },
+                shapes: shapes,
+                annotations: [
+                    { x: 0.2, y: 1.05, xref: 'paper', yref: 'paper', text: 'Blue: Fog', showarrow: false, 
+                      font: { color: '#3498db', size: 12 }, bgcolor: 'rgba(52, 152, 219, 0.2)', borderpad: 4 },
+                    { x: 0.5, y: 1.05, xref: 'paper', yref: 'paper', text: 'Purple: Mist', showarrow: false,
+                      font: { color: '#9b59b6', size: 12 }, bgcolor: 'rgba(155, 89, 182, 0.2)', borderpad: 4 },
+                    { x: 0.8, y: 1.05, xref: 'paper', yref: 'paper', text: 'Red: Haze', showarrow: false,
+                      font: { color: '#e74c3c', size: 12 }, bgcolor: 'rgba(231, 76, 60, 0.2)', borderpad: 4 }
+                ]
+            };
+            
+            Plotly.newPlot('chart2', traces, layout, {responsive: true});
+        }
+        
+        // Chart 3: 3D Phase Space
+        function createChart3D() {
+            const trace1 = {
+                x: allData.map(d => d.rh),
+                y: allData.map(d => d.pm25),
+                z: allData.map(d => d.temp),
+                mode: 'markers',
+                marker: {
+                    size: 5,
+                    color: allData.map(d => {
+                        const condition = classifyCondition(d.rh, d.pm25, d.visibility);
+                        return condition === 'Fog' ? 0 : condition === 'Haze' ? 1 : 0.5;
+                    }),
+                    colorscale: [[0, '#3498db'], [0.5, '#9b59b6'], [1, '#e74c3c']],
+                    showscale: true,
+                    colorbar: {
+                        title: 'Phase',
+                        ticktext: ['Fog', 'Mist', 'Haze'],
+                        tickvals: [0, 0.5, 1]
+                    },
+                    opacity: 0.8
+                },
+                type: 'scatter3d',
+                text: allData.map(d => `${d.stationName}<br>RH: ${d.rh.toFixed(1)}%<br>PM2.5: ${d.pm25.toFixed(1)}<br>T: ${d.temp.toFixed(1)}°C`)
+            };
+            
+            const layout = {
+                scene: {
+                    xaxis: { title: 'Relative Humidity (%)' },
+                    yaxis: { title: 'PM2.5 (μg/m³)' },
+                    zaxis: { title: 'Temperature (°C)' },
+                    camera: { eye: { x: 1.5, y: 1.5, z: 1.5 } }
+                },
+                height: 550,
+                margin: { l: 0, r: 0, t: 0, b: 0 }
+            };
+            
+            Plotly.newPlot('chart3d', [trace1], layout, {responsive: true});
+        }
+        
+        // Chart 4: Wind Rose
+        function createWindRose() {
+            const windData = allData.filter(d => d.ws > 0);
+            const sectors = 16;
+            const sectorSize = 360 / sectors;
+            const roseBins = [];
+            
+            for (let i = 0; i < sectors; i++) {
+                const sectorStart = i * sectorSize;
+                const sectorEnd = (i + 1) * sectorSize;
+                const sectorData = windData.filter(d => d.wd >= sectorStart && d.wd < sectorEnd);
+                
+                if (sectorData.length > 0) {
+                    roseBins.push({
+                        direction: sectorStart + sectorSize / 2,
+                        avgPM25: _.mean(sectorData.map(d => d.pm25)),
+                        avgSpeed: _.mean(sectorData.map(d => d.ws)),
+                        count: sectorData.length
+                    });
+                }
+            }
+            
+            const trace = {
+                r: roseBins.map(b => b.avgPM25),
+                theta: roseBins.map(b => b.direction),
+                type: 'barpolar',
+                marker: {
+                    color: roseBins.map(b => b.avgPM25),
+                    colorscale: 'Portland',
+                    cmin: 0,
+                    cmax: 200,
+                    colorbar: { title: 'PM2.5<br>(μg/m³)' }
+                },
+                text: roseBins.map(b => `Dir: ${b.direction.toFixed(0)}°<br>PM2.5: ${b.avgPM25.toFixed(1)}<br>Speed: ${b.avgSpeed.toFixed(1)} m/s`),
+                hovertemplate: '%{text}'
+            };
+            
+            const layout = {
+                polar: {
+                    radialaxis: { visible: true },
+                    angularaxis: { direction: 'clockwise', rotation: 90 }
+                },
+                height: 500,
+                showlegend: false
+            };
+            
+            Plotly.newPlot('chartWindRose', [trace], layout, {responsive: true});
+        }
+        
+        // Chart 5: Ratio Plot
+        function createRatioPlot() {
+            const ratioData = allData.map(d => ({
+                rh: d.rh,
+                ratio: d.pm25 / d.pm10,
+                condition: classifyCondition(d.rh, d.pm25, d.visibility)
+            }));
+            
+            const conditions = ['Fog', 'Haze', 'Mist'];
+            const colors = ['#3498db', '#e74c3c', '#9b59b6'];
+            const traces = [];
+            
+            conditions.forEach((condition, i) => {
+                const condData = ratioData.filter(d => d.condition === condition);
+                traces.push({
+                    x: condData.map(d => d.rh),
+                    y: condData.map(d => d.ratio),
+                    mode: 'markers',
+                    type: 'scatter',
+                    name: condition,
+                    marker: { color: colors[i], size: 8, opacity: 0.6 }
+                });
+            });
+            
+            const rhRange = _.range(50, 101, 1);
+            traces.push({
+                x: rhRange,
+                y: rhRange.map(rh => 0.4 + 0.3 * Math.exp((rh - 85) / 15)),
+                mode: 'lines',
+                name: 'Theoretical Growth',
+                line: { color: 'black', width: 2, dash: 'dash' }
+            });
+            
+            const layout = {
+                xaxis: { title: 'Relative Humidity (%)' },
+                yaxis: { title: 'PM2.5/PM10 Ratio', range: [0.3, 1.0] },
+                height: 450,
+                showlegend: true,
+                annotations: [
+                    {
+                        x: 95,
+                        y: 0.85,
+                        text: 'Hygroscopic<br>Growth',
+                        showarrow: true,
+                        arrowhead: 2,
+                        arrowsize: 1.5,
+                        arrowwidth: 2,
+                        arrowcolor: 'black',
+                        ax: -40,
+                        ay: -30,
+                        font: { size: 12, color: 'black' },
+                        bgcolor: 'rgba(255,255,255,0.8)',
+                        borderpad: 4
+                    },
+                    {
+                        x: 70,
+                        y: 0.5,
+                        text: 'Dry<br>Aerosols',
+                        showarrow: true,
+                        arrowhead: 2,
+                        arrowsize: 1.5,
+                        arrowwidth: 2,
+                        arrowcolor: 'black',
+                        ax: 40,
+                        ay: 30,
+                        font: { size: 12, color: 'black' },
+                        bgcolor: 'rgba(255,255,255,0.8)',
+                        borderpad: 4
+                    }
+                ]
+            };
+            
+            Plotly.newPlot('chartRatio', traces, layout, {responsive: true});
+        }
+        
+        // Chart 6: Mechanism Diagram
+        function createMechanismDiagram() {
+            const traces = [];
+            const x = _.range(0, 24, 0.5);
+            const fogZone = x.map(h => 95 - 5 * Math.sin((h - 6) * Math.PI / 12));
+            const hazeZone = x.map(h => 75 - 10 * Math.sin((h - 12) * Math.PI / 12));
+            
+            traces.push({
+                x: x,
+                y: fogZone,
+                fill: 'tozeroy',
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Fog Zone',
+                line: { color: 'rgba(52, 152, 219, 0.5)' },
+                fillcolor: 'rgba(52, 152, 219, 0.2)'
+            });
+            
+            traces.push({
+                x: x,
+                y: hazeZone,
+                fill: 'tozeroy',
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Haze Zone',
+                line: { color: 'rgba(231, 76, 60, 0.5)' },
+                fillcolor: 'rgba(231, 76, 60, 0.2)'
+            });
+            
+            traces.push({
+                x: x,
+                y: x.map(h => 87.5),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Mist Threshold (87.5%)',
+                line: { color: '#9b59b6', width: 2, dash: 'dash' }
+            });
+            
+            const hourlyData = _.groupBy(allData, d => d.datetime.getHours());
+            const hourlyMeans = Object.keys(hourlyData).map(hour => ({
+                hour: parseInt(hour),
+                rh: _.mean(hourlyData[hour].map(d => d.rh)),
+                pm25: _.mean(hourlyData[hour].map(d => d.pm25))
+            }));
+            
+            traces.push({
+                x: hourlyMeans.map(d => d.hour),
+                y: hourlyMeans.map(d => d.rh),
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Observed RH',
+                line: { color: 'purple', width: 3 },
+                marker: { size: 8 },
+                yaxis: 'y'
+            });
+            
+            traces.push({
+                x: hourlyMeans.map(d => d.hour),
+                y: hourlyMeans.map(d => d.pm25),
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'PM2.5',
+                line: { color: 'orange', width: 3 },
+                marker: { size: 8 },
+                yaxis: 'y2'
+            });
+            
+            const layout = {
+                xaxis: { title: 'Hour of Day', range: [0, 23], dtick: 3 },
+                yaxis: { title: 'Relative Humidity (%)', range: [50, 100] },
+                yaxis2: { title: 'PM2.5 (μg/m³)', overlaying: 'y', side: 'right' },
+                height: 500,
+                annotations: [
+                    { x: 6, y: 95, text: 'Fog Formation', showarrow: true, arrowhead: 2, ax: -40, ay: -40 },
+                    { x: 14, y: 75, text: 'Haze Dominance', showarrow: true, arrowhead: 2, ax: 40, ay: 40 }
+                ]
+            };
+            
+            Plotly.newPlot('chartMechanism', traces, layout, {responsive: true});
+        }
+        
+        // Charts 7-14: Additional charts
+        function createChart7() {
+            // Spatiotemporal heatmap
+            const z = [];
+            const stationNames = [];
+            
+            stations.forEach(station => {
+                const stationData = allData.filter(d => d.station === station.code);
+                z.push(stationData.map(d => d.pm25));
+                stationNames.push(station.name);
+            });
+            
+            const trace = {
+                z: z,
+                x: processedData.zhengzhou.map(d => d.datetime),
+                y: stationNames,
+                type: 'heatmap',
+                colorscale: [[0, '#00FF00'], [0.2, '#FFFF00'], [0.4, '#FFA500'], 
+                            [0.6, '#FF0000'], [0.8, '#8B0000'], [1, '#4B0082']],
+                colorbar: { title: 'PM2.5<br>(μg/m³)' }
+            };
+            
+            const layout = {
+                xaxis: { title: 'Datetime', tickformat: '%m/%d %H:00' },
+                yaxis: { 
+                    title: 'Station',
+                    titlefont: { size: 14 },
+                    tickfont: { size: 12 },
+                    standoff: 20  // Add standoff to move title away from tick labels
+                },
+                height: 450,
+                margin: { l: 100, r: 80, t: 30, b: 60 }  // Increase left margin
+            };
+            
+            Plotly.newPlot('chart7', [trace], layout, {responsive: true});
+        }
+        
+        function createChart8() {
+            // 3D phase space - multi-station
+            const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e', '#e67e22'];
+            const traces = [];
+            
+            stations.forEach((station, i) => {
+                const stationData = allData.filter(d => d.station === station.code);
+                if (stationData.length === 0) return;
+                
+                traces.push({
+                    x: stationData.map(d => d.rh),
+                    y: stationData.map(d => d.pm25),
+                    z: stationData.map(d => d.visibility / 1000),
+                    mode: 'markers+lines',
+                    type: 'scatter3d',
+                    name: station.name,
+                    marker: { size: 3, color: colors[i], opacity: 0.6 },
+                    line: { width: 2, color: colors[i] }
+                });
+            });
+            
+            const layout = {
+                scene: {
+                    xaxis: { title: 'RH (%)' },
+                    yaxis: { title: 'PM2.5 (μg/m³)' },
+                    zaxis: { title: 'Visibility (km)' }
+                },
+                height: 550
+            };
+            
+            Plotly.newPlot('chart8', traces, layout, {responsive: true});
+        }
+        
+        function createChart9() {
+            // Vertical profile
+            const timePoints = [
+                { idx: 6, label: '12/28 06:00' },
+                { idx: 30, label: '12/29 06:00' },
+                { idx: 54, label: '12/30 06:00' },
+                { idx: 78, label: '12/31 06:00' }
+            ];
+            
+            const traces = [];
+            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12'];
+            
+            timePoints.forEach((tp, i) => {
+                const profileData = stations.map(station => {
+                    const stationData = allData.filter(d => d.station === station.code);
+                    if (stationData.length > tp.idx) {
+                        return {
+                            alt: station.alt,
+                            pm25: stationData[tp.idx].pm25
+                        };
+                    }
+                    return null;
+                }).filter(d => d !== null);
+                
+                profileData.sort((a, b) => a.alt - b.alt);
+                
+                traces.push({
+                    x: profileData.map(d => d.pm25),
+                    y: profileData.map(d => d.alt),
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: tp.label,
+                    line: { color: colors[i], width: 2.5 },
+                    marker: { size: 8, color: colors[i] }
+                });
+            });
+            
+            const layout = {
+                xaxis: { title: 'PM2.5 (μg/m³)' },
+                yaxis: { title: 'Altitude (m)' },
+                height: 500
+            };
+            
+            Plotly.newPlot('chart9', traces, layout, {responsive: true});
+        }
+        
+        function createChart10() {
+            // Diurnal patterns
+            const hourlyData = {};
+            for (let h = 0; h < 24; h++) {
+                hourlyData[h] = { pm25: [], rh: [], visibility: [] };
+            }
+            
+            allData.forEach(d => {
+                const hour = d.datetime.getHours();
+                hourlyData[hour].pm25.push(d.pm25);
+                hourlyData[hour].rh.push(d.rh);
+                hourlyData[hour].visibility.push(d.visibility / 1000);
+            });
+            
+            const hours = Array.from({length: 24}, (_, i) => i);
+            const avgPM25 = hours.map(h => _.mean(hourlyData[h].pm25) || 0);
+            const avgRH = hours.map(h => _.mean(hourlyData[h].rh) || 0);
+            const avgVis = hours.map(h => _.mean(hourlyData[h].visibility) || 0);
+            
+            const traces = [
+                {
+                    r: avgPM25,
+                    theta: hours.map(h => h * 15),
+                    type: 'scatterpolar',
+                    mode: 'lines+markers',
+                    name: 'PM2.5',
+                    fill: 'toself',
+                    fillcolor: 'rgba(231, 76, 60, 0.2)',
+                    line: { color: '#e74c3c', width: 3 }
+                },
+                {
+                    r: avgRH,
+                    theta: hours.map(h => h * 15),
+                    type: 'scatterpolar',
+                    mode: 'lines+markers',
+                    name: 'RH (%)',
+                    fill: 'toself',
+                    fillcolor: 'rgba(52, 152, 219, 0.2)',
+                    line: { color: '#3498db', width: 3 }
+                },
+                {
+                    r: avgVis.map(v => v * 10),
+                    theta: hours.map(h => h * 15),
+                    type: 'scatterpolar',
+                    mode: 'lines+markers',
+                    name: 'Visibility (×10)',
+                    fill: 'toself',
+                    fillcolor: 'rgba(46, 204, 113, 0.2)',
+                    line: { color: '#2ecc71', width: 3 }
+                }
+            ];
+            
+            const layout = {
+                polar: {
+                    radialaxis: { visible: true, range: [0, 150] },
+                    angularaxis: {
+                        direction: 'clockwise',
+                        tickmode: 'array',
+                        tickvals: [0, 45, 90, 135, 180, 225, 270, 315],
+                        ticktext: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00']
+                    }
+                },
+                height: 500
+            };
+            
+            Plotly.newPlot('chart10', traces, layout, {responsive: true});
+        }
+        
+        function createChart11() {
+            // RH-PM2.5-PM10 relationship
+            const trace1 = {
+                x: allData.map(d => d.rh),
+                y: allData.map(d => d.pm25),
+                mode: 'markers',
+                type: 'scatter',
+                name: 'PM2.5',
+                marker: {
+                    size: 5,
+                    symbol: 'circle',
+                    color: allData.map(d => d.pm25),
+                    colorscale: 'Portland',
+                    showscale: true,
+                    colorbar: { 
+                        title: 'PM2.5<br>(μg/m³)',
+                        x: 1.08,
+                        len: 0.8
+                    },
+                    opacity: 0.6
+                }
+            };
+            
+            // Add PM10 data with triangle markers
+            const trace2 = {
+                x: allData.map(d => d.rh),
+                y: allData.map(d => d.pm10),
+                mode: 'markers',
+                type: 'scatter',
+                name: 'PM10',
+                marker: {
+                    size: 6,
+                    symbol: 'triangle-up',
+                    color: allData.map(d => d.pm10),
+                    colorscale: 'Viridis',
+                    showscale: true,
+                    colorbar: { 
+                        title: 'PM10<br>(μg/m³)',
+                        x: 1.18,
+                        len: 0.8
+                    },
+                    opacity: 0.5
+                }
+            };
+            
+            const trace3 = {
+                x: [80, 80],
+                y: [0, 450],
+                mode: 'lines',
+                type: 'scatter',
+                name: 'Haze/Mist Threshold',
+                line: { color: 'red', width: 2, dash: 'dash' },
+                showlegend: true
+            };
+            
+            const trace4 = {
+                x: [95, 95],
+                y: [0, 450],
+                mode: 'lines',
+                type: 'scatter',
+                name: 'Fog Threshold',
+                line: { color: 'blue', width: 2, dash: 'dash' },
+                showlegend: true
+            };
+            
+            const layout = {
+                xaxis: { title: 'Relative Humidity (%)', range: [20, 100] },
+                yaxis: { title: 'Particulate Matter (μg/m³)', range: [0, 450] },
+                height: 500,
+                margin: { l: 80, r: 150, t: 30, b: 60 },
+                legend: {
+                    x: 0.02,
+                    y: 0.98,
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    bordercolor: 'rgba(0,0,0,0.2)',
+                    borderwidth: 1
+                }
+            };
+            
+            Plotly.newPlot('chart11', [trace1, trace2, trace3, trace4], layout, {responsive: true});
+        }
+        
+        function createChart12() {
+            // Correlation matrix with numbers
+            const variables = ['PM2.5', 'PM10', 'SO2', 'NO2', 'CO', 'O3', 'RH', 'Temp', 'WS'];
+            const dataArrays = [
+                allData.map(d => d.pm25),
+                allData.map(d => d.pm10),
+                allData.map(d => d.so2),
+                allData.map(d => d.no2),
+                allData.map(d => d.co),
+                allData.map(d => d.o3),
+                allData.map(d => d.rh),
+                allData.map(d => d.temp),
+                allData.map(d => d.ws)
+            ];
+            
+            const corrMatrix = [];
+            for (let i = 0; i < variables.length; i++) {
+                const row = [];
+                for (let j = 0; j < variables.length; j++) {
+                    const corr = calculateCorrelation(dataArrays[i], dataArrays[j]);
+                    row.push(corr);
+                }
+                corrMatrix.push(row);
+            }
+            
+            // Create annotations for the numbers
+            const annotations = [];
+            for (let i = 0; i < variables.length; i++) {
+                for (let j = 0; j < variables.length; j++) {
+                    annotations.push({
+                        x: variables[j],
+                        y: variables[i],
+                        text: corrMatrix[i][j].toFixed(2),
+                        showarrow: false,
+                        font: {
+                            size: 11,
+                            color: Math.abs(corrMatrix[i][j]) > 0.5 ? 'white' : 'black'
+                        }
+                    });
+                }
+            }
+            
+            const trace = {
+                z: corrMatrix,
+                x: variables,
+                y: variables,
+                type: 'heatmap',
+                colorscale: [[0, '#3498db'], [0.5, '#ffffff'], [1, '#e74c3c']],
+                zmin: -1,
+                zmax: 1,
+                colorbar: { title: 'Correlation' },
+                showscale: true
+            };
+            
+            const layout = {
+                height: 550,
+                margin: { l: 80, r: 80, t: 30, b: 80 },
+                annotations: annotations
+            };
+            
+            Plotly.newPlot('chart12', [trace], layout, {responsive: true});
+        }
+        
+        function createChart13() {
+            // Model comparison
+            const obsVis = allData.map(d => d.visibility / 1000);
+            const ecVis = allData.map(d => d.ec_vis / 1000);
+            const obsT = allData.map(d => d.temp);
+            const ecT = allData.map(d => d.ec_t2m);
+            
+            const trace1 = {
+                x: obsVis,
+                y: ecVis,
+                mode: 'markers',
+                type: 'scatter',
+                name: 'Visibility',
+                marker: { size: 4, color: '#3498db', opacity: 0.5 },
+                xaxis: 'x',
+                yaxis: 'y'
+            };
+            
+            const trace2 = {
+                x: obsT,
+                y: ecT,
+                mode: 'markers',
+                type: 'scatter',
+                name: 'Temperature',
+                marker: { size: 4, color: '#e74c3c', opacity: 0.5 },
+                xaxis: 'x2',
+                yaxis: 'y2'
+            };
+            
+            const maxVis = Math.max(...obsVis);
+            const trace3 = {
+                x: [0, maxVis],
+                y: [0, maxVis],
+                mode: 'lines',
+                type: 'scatter',
+                showlegend: false,
+                line: { color: 'black', width: 2, dash: 'dash' },
+                xaxis: 'x',
+                yaxis: 'y'
+            };
+            
+            const layout = {
+                grid: { rows: 1, columns: 2, pattern: 'independent' },
+                xaxis: { title: 'Observed Visibility (km)', domain: [0, 0.45] },
+                yaxis: { title: 'EC Model Visibility (km)' },
+                xaxis2: { title: 'Observed Temperature (°C)', domain: [0.55, 1] },
+                yaxis2: { title: 'EC Model Temperature (°C)', anchor: 'x2' },
+                height: 450
+            };
+            
+            Plotly.newPlot('chart13', [trace1, trace3, trace2], layout, {responsive: true});
+        }
+        
+        function createChart14() {
+            // AQI distribution
+            const traces = [];
+            stations.forEach(station => {
+                const stationData = allData.filter(d => d.station === station.code);
+                const aqiValues = stationData.map(d => {
+                    const pm25 = d.pm25;
+                    if (pm25 <= 35) return pm25 * 50 / 35;
+                    if (pm25 <= 75) return 50 + (pm25 - 35) * 50 / 40;
+                    if (pm25 <= 115) return 100 + (pm25 - 75) * 50 / 40;
+                    if (pm25 <= 150) return 150 + (pm25 - 115) * 50 / 35;
+                    if (pm25 <= 250) return 200 + (pm25 - 150) * 100 / 100;
+                    return 300 + (pm25 - 250) * 100 / 100;
+                });
+                
+                traces.push({
+                    y: aqiValues,
+                    type: 'box',
+                    name: station.name,
+                    boxmean: 'sd'
+                });
+            });
+            
+            const layout = {
+                yaxis: { title: 'Air Quality Index', range: [0, 350] },
+                xaxis: { title: 'Station' },
+                height: 400,
+                shapes: [
+                    { type: 'line', x0: 0, x1: 1, xref: 'paper', y0: 50, y1: 50,
+                      line: { color: '#00e400', width: 2, dash: 'dash' } },
+                    { type: 'line', x0: 0, x1: 1, xref: 'paper', y0: 100, y1: 100,
+                      line: { color: '#ffff00', width: 2, dash: 'dash' } },
+                    { type: 'line', x0: 0, x1: 1, xref: 'paper', y0: 150, y1: 150,
+                      line: { color: '#ff7e00', width: 2, dash: 'dash' } }
+                ]
+            };
+            
+            Plotly.newPlot('chart14', traces, layout, {responsive: true});
+        }
+
+        // Chart 15: Wind Field Image Display
+        let animationInterval = null;
+        let currentFrame = 0;
+
+        function createChart15() {
+            // Initialize the image display
+            currentFrame = 0;
+            updateImage(0);
+        }
+
+        function updateImage(frameIndex) {
+            currentFrame = parseInt(frameIndex);
+            const paddedIndex = String(currentFrame).padStart(4, '0');
+            const imagePath = `./郑州/wind_field_maps/wind_field_${paddedIndex}.png`;
+
+            document.getElementById('windFieldImage').src = imagePath;
+            document.getElementById('timeSlider').value = currentFrame;
+
+            // Update time label based on frame (Dec 25-31, 2023)
+            const startDate = new Date('2023-12-25T00:00:00');
+            const currentTime = new Date(startDate.getTime() + currentFrame * 60 * 60 * 1000); // Add hours
+            const timeStr = `${currentTime.getMonth()+1}/${currentTime.getDate()} ${String(currentTime.getHours()).padStart(2,'0')}:00`;
+            document.getElementById('timeLabel').textContent = `Time: ${timeStr}`;
+        }
+
+        function playAnimation() {
+            if (animationInterval) clearInterval(animationInterval);
+
+            animationInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame > 167) currentFrame = 0; // 7 days * 24 hours = 168 frames
+                updateImage(currentFrame);
+            }, 200); // 200ms per frame
+        }
+
+        function pauseAnimation() {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
+        }
+        
+        // Helper function
+        function calculateCorrelation(x, y) {
+            const n = Math.min(x.length, y.length);
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+            
+            for (let i = 0; i < n; i++) {
+                sumX += x[i];
+                sumY += y[i];
+                sumXY += x[i] * y[i];
+                sumX2 += x[i] * x[i];
+                sumY2 += y[i] * y[i];
+            }
+            
+            const r = (n * sumXY - sumX * sumY) / 
+                     Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+            
+            return isNaN(r) ? 0 : r;
+        }
+        
+        // Handle file selection
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                console.log('Files selected:', files.length);
+                for (let file of files) {
+                    console.log(`- ${file.name} (${file.size} bytes)`);
+                }
+            }
+        }
+        
+        // Test load zz_all.csv specifically
+        async function testLoadZZFile() {
+            // 直接读取郑州数据文件
+            const response = await fetch('./郑州/zz_all.csv');
+            const content = await response.text();
+            const zzFile = new Blob([content], {type: 'text/csv'});
+
+            if (!zzFile) {
+                showStatus('Please select zz_all.csv file first', 'error');
+                return;
+            }
+            
+            try {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const parsed = Papa.parse(content, {
+                        header: true,
+                        dynamicTyping: true,
+                        skipEmptyLines: true
+                    });
+                    
+                    // Process the data
+                    allData = [];
+                    const processedFileData = parsed.data.map(row => {
+                        // Parse date - handle various formats
+                        let datetime;
+                        if (row.DATE) {
+                            // Try different date parsing approaches
+                            datetime = new Date(row.DATE);
+                            if (isNaN(datetime.getTime())) {
+                                // Try parsing as YYYY-MM-DD HH:mm:ss
+                                const parts = row.DATE.split(/[- :]/);
+                                if (parts.length >= 3) {
+                                    datetime = new Date(parts[0], parts[1] - 1, parts[2], 
+                                                      parts[3] || 0, parts[4] || 0, parts[5] || 0);
+                                }
+                            }
+                        }
+                        
+                        if (!datetime || isNaN(datetime.getTime())) {
+                            datetime = new Date();
+                        }
+                        
+                        const processedRow = {
+                            datetime: datetime,
+                            station: row.staCode ? String(row.staCode) : '57083',
+                            pm25: row['PM2.5'] || 0,
+                            pm10: row.PM10 || 0,
+                            rh: row.rh || 50,
+                            temp: row.t || 10,
+                            ws: row.ws_2mi_avg || 2,
+                            wd: row.wd_2mi_avg || 180,
+                            visibility: row.vis_atf || 5000,
+                            vis_atf: row.vis_atf || 5000,
+                            ec_vis: row.ec_vis || row.vis_atf || 5000,
+                            ec_t2m: row.ec_t2m || row.t || 10,
+                            dewpoint: row.dt || row.ec_d2m || 5,
+                            pressure: row.p || row.sp || 1013,
+                            so2: row.SO2 || 10,
+                            no2: row.NO2 || 20,
+                            co: row.CO || 0.5,
+                            o3: row.O3 || 30
+                        };
+                        
+                        // Add station name
+                        const stationInfo = stations.find(s => s.code === processedRow.station);
+                        processedRow.stationName = stationInfo ? stationInfo.name : `Station ${processedRow.station}`;
+                        
+                        return processedRow;
+                    });
+                    
+                    allData = processedFileData;
+                    console.log('Processed data:', allData.length, 'rows');
+                    console.log('Sample processed row:', allData[0]);
+                    
+                    processData();
+                    createAllCharts();
+                    showStatus(`Successfully loaded ${allData.length} data points`, 'success');
+                };
+                
+                reader.readAsText(zzFile);
+            } catch (error) {
+                console.error('Error loading zz_all.csv:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        window.onload = function() {
+            testLoadZZFile();
+        };
+    </script>
+</body>
+</html>
