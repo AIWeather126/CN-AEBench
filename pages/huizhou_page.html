@@ -444,8 +444,6 @@
             <div id="chart11" style="height: 550px; position: relative;">
                 <img id="windFieldImage" src="" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
                 <div id="imageControls" style="text-align: center; margin-top: 10px;">
-                    <button onclick="playAnimation()" style="margin: 5px;">▶ Play</button>
-                    <button onclick="pauseAnimation()" style="margin: 5px;">⏸ Pause</button>
                     <input type="range" id="timeSlider" min="0" max="143" value="0" style="width: 80%; margin: 10px;" oninput="updateImage(this.value)">
                     <div id="timeLabel" style="font-weight: bold; margin-top: 5px;">Time: Loading...</div>
                 </div>
@@ -488,8 +486,6 @@
             const content = await response.text();
             processCSVData(content);
         }
-        
-        // Process CSV data
         function processCSVData(content) {
             
             const parsed = Papa.parse(content, {
@@ -513,11 +509,11 @@
                     pressure: row.p || row.sp || 1005,
                     slp: row.slp || row.ec_msl || 1008,
                     rh: row.rh || row.ec_rh || 85,
-                    precipitation: row.prec_1h || 0,
-                    visibility: row.vis_atf || 5000,
-                    ws: row.ws_2mi_avg || row.ec_ws || 5,
-                    ws10min: row.ws_10mi_avg || row.ws_2mi_avg || 5,
-                    wd: row.wd_2mi_avg || row.ec_wd || 180,
+                    precipitation: row.precipitation || 0,
+                    visibility: row.vis || 5000,
+                    ws: row.ws_2min || row.ec_ws || 5,
+                    ws10min: row.ws_10min || row.ws_2min || 5,
+                    wd: row.wd_2min || row.ec_wd || 180,
                     pm25: row['PM2.5'] || 15,
                     pm10: row.PM10 || 25,
                     so2: row.SO2 || 10,

@@ -431,8 +431,6 @@
             <div id="chart15" style="height: 550px; position: relative;">
                 <img id="windFieldImage" src="" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
                 <div id="imageControls" style="text-align: center; margin-top: 10px;">
-                    <button onclick="playAnimation()" style="margin: 5px;">▶ Play</button>
-                    <button onclick="pauseAnimation()" style="margin: 5px;">⏸ Pause</button>
                     <input type="range" id="timeSlider" min="0" max="167" value="0" style="width: 80%; margin: 10px;" oninput="updateImage(this.value)">
                     <div id="timeLabel" style="font-weight: bold; margin-top: 5px;">Time: Loading...</div>
                 </div>
@@ -1564,10 +1562,7 @@
                 }
             }
         }
-        
-        // Test load zz_all.csv specifically
         async function testLoadZZFile() {
-            // 直接读取郑州数据文件
             const response = await fetch('./郑州/zz_all.csv');
             const content = await response.text();
             const zzFile = new Blob([content], {type: 'text/csv'});
@@ -1616,8 +1611,8 @@
                             pm10: row.PM10 || 0,
                             rh: row.rh || 50,
                             temp: row.t || 10,
-                            ws: row.ws_2mi_avg || 2,
-                            wd: row.wd_2mi_avg || 180,
+                            ws: row.ws_2min || 2,
+                            wd: row.wd_2min || 180,
                             visibility: row.vis || 5000,
                             vis: row.vis || 5000,
                             ec_vis: row.ec_vis || row.vis || 5000,

@@ -377,8 +377,6 @@
             <div id="chart10" style="height: 550px; position: relative;">
                 <img id="windFieldImage" src="" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
                 <div id="imageControls" style="text-align: center; margin-top: 10px;">
-                    <button onclick="playAnimation()" style="margin: 5px;">▶ Play</button>
-                    <button onclick="pauseAnimation()" style="margin: 5px;">⏸ Pause</button>
                     <input type="range" id="timeSlider" min="0" max="96" value="0" style="width: 80%; margin: 10px;" oninput="updateImage(this.value)">
                     <div id="timeLabel" style="font-weight: bold; margin-top: 5px;">Time: Loading...</div>
                 </div>
@@ -431,10 +429,10 @@
                         pressure: row.p || row.sp || 850,
                         slp: row.slp || row.ec_msl || 1000,
                         rh: row.rh || row.ec_rh || 30,
-                        visibility: row.vis_atf || 5000,
-                        ws: row.ws_2mi_avg || row.ec_ws || 8,
-                        ws10min: row.ws_10mi_avg || row.ws_2mi_avg || 8,
-                        wd: row.wd_2mi_avg || row.ec_wd || 270,
+                        visibility: row.vis || 5000,
+                        ws: row.ws_2min || row.ec_ws || 8,
+                        ws10min: row.ws_10min || row.ws_2min || 8,
+                        wd: row.wd_2min || row.ec_wd || 270,
                         pm25: row['PM2.5'] || 50,
                         pm10: row.PM10 || 200,
                         so2: row.SO2 || 15,
