@@ -286,52 +286,52 @@
             </div>
             <div class="station-grid">
                 <div class="station-item">
-                    <div class="station-name">巩义 (Gongyi)</div>
+                    <div class="station-name">Gongyi</div>
                     <div>Station: 57080</div>
                     <div>Lon: 112.98°E, Lat: 34.81°N, Alt: 251.1m</div>
-                    <div class="station-type">旱地 (Dryland)</div>
+                    <div class="station-type">Dryland</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">荥阳 (Xingyang)</div>
+                    <div class="station-name">Xingyang</div>
                     <div>Station: 57081</div>
                     <div>Lon: 113.40°E, Lat: 34.79°N, Alt: 140.9m</div>
-                    <div class="station-type">城镇用地 (Urban)</div>
+                    <div class="station-type">Urban</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">登封 (Dengfeng)</div>
+                    <div class="station-name">登封</div>
                     <div>Station: 57082</div>
                     <div>Lon: 113.11°E, Lat: 34.49°N, Alt: 413.2m</div>
-                    <div class="station-type">旱地 (Dryland)</div>
+                    <div class="station-type">Dryland</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">郑州 (Zhengzhou)</div>
+                    <div class="station-name">Zhengzhou</div>
                     <div>Station: 57083</div>
                     <div>Lon: 113.66°E, Lat: 34.71°N, Alt: 110.4m</div>
-                    <div class="station-type">城镇用地 (Urban)</div>
+                    <div class="station-type">Urban</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">嵩山 (Songshan)</div>
+                    <div class="station-name">Songshan</div>
                     <div>Station: 57084</div>
                     <div>Lon: 113.05°E, Lat: 34.49°N, Alt: 1178.4m</div>
-                    <div class="station-type">有林地 (Forest)</div>
+                    <div class="station-type">Forest</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">新密 (Xinmi)</div>
+                    <div class="station-name">Xinmi</div>
                     <div>Station: 57085</div>
                     <div>Lon: 113.34°E, Lat: 34.54°N, Alt: 259.9m</div>
-                    <div class="station-type">城镇用地 (Urban)</div>
+                    <div class="station-type">Urban</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">新郑 (Xinzheng)</div>
+                    <div class="station-name">Xinzheng</div>
                     <div>Station: 57086</div>
                     <div>Lon: 113.72°E, Lat: 34.38°N, Alt: 116.6m</div>
-                    <div class="station-type">农村居民点 (Rural)</div>
+                    <div class="station-type">Rural</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">中牟 (Zhongmu)</div>
+                    <div class="station-name">Zhongmu</div>
                     <div>Station: 57090</div>
                     <div>Lon: 114.04°E, Lat: 34.74°N, Alt: 80.6m</div>
-                    <div class="station-type">农村居民点 (Rural)</div>
+                    <div class="station-type">Rural</div>
                 </div>
             </div>
         </div>
@@ -586,7 +586,7 @@
                 );
                 const visValues = timeData.map(d => d.visibility / 1000); // Convert to km
                 // Include station 57083 in the range
-                visValues.push(zhengzhouData[idx].vis_atf / 1000);
+                visValues.push(zhengzhouData[idx].vis / 1000);
                 return {
                     min: Math.min(...visValues),
                     max: Math.max(...visValues)
@@ -618,10 +618,10 @@
                 },
                 {
                     x: times,
-                    y: zhengzhouData.map(d => d.vis_atf / 1000),
+                    y: zhengzhouData.map(d => d.vis / 1000),
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'Station 57083 Vis_ATF',
+                    name: 'Station 57083 Vis',
                     line: { color: '#1e3a8a', width: 3 },
                     yaxis: 'y'
                 },
@@ -711,7 +711,7 @@
             const traces = [
                 {
                     x: times,
-                    y: zhengzhouData.map(d => d.vis_atf / 1000),
+                    y: zhengzhouData.map(d => d.vis / 1000),
                     type: 'scatter',
                     mode: 'lines',
                     name: 'Visibility',
@@ -1618,9 +1618,9 @@
                             temp: row.t || 10,
                             ws: row.ws_2mi_avg || 2,
                             wd: row.wd_2mi_avg || 180,
-                            visibility: row.vis_atf || 5000,
-                            vis_atf: row.vis_atf || 5000,
-                            ec_vis: row.ec_vis || row.vis_atf || 5000,
+                            visibility: row.vis || 5000,
+                            vis: row.vis || 5000,
+                            ec_vis: row.ec_vis || row.vis || 5000,
                             ec_t2m: row.ec_t2m || row.t || 10,
                             dewpoint: row.dt || row.ec_d2m || 5,
                             pressure: row.p || row.sp || 1013,

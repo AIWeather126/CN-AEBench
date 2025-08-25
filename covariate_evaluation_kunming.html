@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Covariate Impact Evaluation - Academic Style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #212529;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+
+        .legend-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .legend-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-sample {
+            padding: 2px 6px;
+            border: 1px solid #dee2e6;
+            background: white;
+            min-width: 80px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th, td {
+            padding: 6px 4px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        thead th {
+            background: #e9ecef;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .metric-header {
+            background: linear-gradient(180deg, #e6f3ff 0%, #f0f8ff 100%);
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .indicator-header {
+            background: #f5f5f5;
+            font-weight: normal;
+            font-size: 10px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        tbody tr:hover {
+            background-color: #f0f4f8;
+        }
+
+        .model-cell {
+            background: #f8f9fa;
+            font-weight: bold;
+            vertical-align: middle;
+            border-right: 2px solid #adb5bd;
+        }
+
+        .config-cell {
+            background: #fcfcfc;
+            font-weight: 500;
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        .mae-col { background-color: rgba(255, 240, 240, 0.3); }
+        .corr-col { background-color: rgba(240, 255, 240, 0.3); }
+        .dtw-col { background-color: rgba(255, 245, 230, 0.2); }
+        .rqe-col { background-color: rgba(240, 245, 255, 0.2); }
+
+        .best-val {
+            font-weight: bold;
+            color: #d73502;
+        }
+
+        .second-val {
+            text-decoration: underline;
+            color: #0066cc;
+        }
+
+        .na {
+            color: #a0a0a0;
+            font-style: italic;
+            font-size: 10px;
+        }
+
+        .improvement {
+            color: #28a745;
+            font-size: 9px;
+            font-weight: normal;
+        }
+
+        .degradation {
+            color: #dc3545;
+            font-size: 9px;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Table. Impact of Covariates on Prediction Performance</h1>
+        <div class="subtitle">District: Kunming</div>
+
+        <div class="legend-section">
+            <div class="legend-title">Covariate Configurations</div>
+            <div class="legend-content">
+                <div class="legend-item">
+                    <span class="legend-sample">Single</span>
+                    <span>Univariate</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-sample">+Weather</span>
+                    <span>Single + Meteorological factors</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-sample">+Weather+Air</span>
+                    <span>Single + Weather + Air quality</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-sample">+Weather+Air+NWP</span>
+                    <span>Single + Weather + Air + NWP model</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-sample best-val">Red Bold</span>
+                    <span>Best performance</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-sample second-val">Blue Underline</span>
+                    <span>Second best</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="3" class="model-cell">Model</th>
+                        <th rowspan="3" class="config-cell">Configuration</th>
+                        <th colspan="9" class="metric-header">T</th>
+                        <th colspan="9" class="metric-header">VIS</th>
+                    </tr>
+                    <tr>
+                        <th colspan="2">Basic</th>
+                        <th colspan="7">Extreme Events</th>
+                        <th colspan="2">Basic</th>
+                        <th colspan="7">Extreme Events</th>
+                    </tr>
+                    <tr>
+                        <th class="indicator-header mae-col">MAE</th>
+                        <th class="indicator-header corr-col">Corr (24<sup>th</sup>)</th>
+                        <th class="indicator-header dtw-col">DTW</th>
+                        <th class="indicator-header rqe-col">HRQE</th>
+                        <th class="indicator-header rqe-col">LRQE</th>
+                        <th class="indicator-header rqe-col">HWRQE</th>
+                        <th class="indicator-header rqe-col">LWRQE</th>
+                        <th class="indicator-header rqe-col">HCSRQE</th>
+                        <th class="indicator-header rqe-col">LCSRQE</th>
+                        <th class="indicator-header mae-col">MAE</th>
+                        <th class="indicator-header corr-col">Corr (24<sup>th</sup>)</th>
+                        <th class="indicator-header dtw-col">DTW (×10<sup>7</sup>)
+                        <th class="indicator-header rqe-col">HRQE</th>
+                        <th class="indicator-header rqe-col">LRQE (×10<sup>7</sup>)
+                        <th class="indicator-header rqe-col">HWRQE</th>
+                        <th class="indicator-header rqe-col">LWRQE (×10<sup>7</sup>)
+                        <th class="indicator-header rqe-col">HCSRQE</th>
+                        <th class="indicator-header rqe-col">LCSRQE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="4" class="model-cell">GraphWaveNet</td>
+                        <td class="config-cell">Single</td>
+                        <td data-raw="1.59" data-model="GraphWaveNet_single" data-metric="T" data-indicator="MAE"></td>
+                        <td data-raw="0.79" data-model="GraphWaveNet_single" data-metric="T" data-indicator="Corr"></td>
+                        <td data-raw="2.82" data-model="GraphWaveNet_single" data-metric="T" data-indicator="DTW"></td>
+                        <td data-raw="4110.44" data-model="GraphWaveNet_single" data-metric="T" data-indicator="HRQE"></td>
+                        <td data-raw="2130.03" data-model="GraphWaveNet_single" data-metric="T" data-indicator="LRQE"></td>
+                        <td data-raw="547.90" data-model="GraphWaveNet_single" data-metric="T" data-indicator="HWRQE"></td>
+                        <td data-raw="289.31" data-model="GraphWaveNet_single" data-metric="T" data-indicator="LWRQE"></td>
+                        <td data-raw="0.06" data-model="GraphWaveNet_single" data-metric="T" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.07" data-model="GraphWaveNet_single" data-metric="T" data-indicator="LCSRQE"></td>
+                        <td data-raw="3882.29" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="MAE"></td>
+                        <td data-raw="0.74" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="Corr"></td>
+                        <td data-raw="2.29" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="DTW"></td>
+                        <td data-raw="0.15" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="HRQE"></td>
+                        <td data-raw="14.96" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="LRQE"></td>
+                        <td data-raw="0.03" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="HWRQE"></td>
+                        <td data-raw="3.23" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="LWRQE"></td>
+                        <td data-raw="0.28" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.93" data-model="GraphWaveNet_single" data-metric="VIS" data-indicator="LCSRQE"></td>
+                    </tr>
+                    <tr>
+                        <td class="config-cell">+Weather</td>
+                        <td data-raw="1.63" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="MAE"></td>
+                        <td data-raw="0.79" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="Corr"></td>
+                        <td data-raw="2.93" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="DTW"></td>
+                        <td data-raw="2595.60" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="HRQE"></td>
+                        <td data-raw="1498.73" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="LRQE"></td>
+                        <td data-raw="355.17" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="HWRQE"></td>
+                        <td data-raw="221.01" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="LWRQE"></td>
+                        <td data-raw="0.46" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.07" data-model="GraphWaveNet_weather" data-metric="T" data-indicator="LCSRQE"></td>
+                        <td data-raw="3827.93" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="MAE"></td>
+                        <td data-raw="0.75" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="Corr"></td>
+                        <td data-raw="2.05" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="DTW"></td>
+                        <td data-raw="0.16" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="HRQE"></td>
+                        <td data-raw="13.62" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="LRQE"></td>
+                        <td data-raw="0.03" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="HWRQE"></td>
+                        <td data-raw="2.92" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="LWRQE"></td>
+                        <td data-raw="0.34" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.94" data-model="GraphWaveNet_weather" data-metric="VIS" data-indicator="LCSRQE"></td>
+                    </tr>
+                    <tr>
+                        <td class="config-cell">+Weather+Air</td>
+                        <td data-raw="1.64" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="MAE"></td>
+                        <td data-raw="0.78" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="Corr"></td>
+                        <td data-raw="2.98" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="DTW"></td>
+                        <td data-raw="2630.00" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="HRQE"></td>
+                        <td data-raw="1819.57" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="LRQE"></td>
+                        <td data-raw="347.90" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="HWRQE"></td>
+                        <td data-raw="255.66" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="LWRQE"></td>
+                        <td data-raw="0.07" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.08" data-model="GraphWaveNet_weather_air" data-metric="T" data-indicator="LCSRQE"></td>
+                        <td data-raw="3936.82" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="MAE"></td>
+                        <td data-raw="0.74" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="Corr"></td>
+                        <td data-raw="2.22" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="DTW"></td>
+                        <td data-raw="0.18" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="HRQE"></td>
+                        <td data-raw="16.44" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="LRQE"></td>
+                        <td data-raw="0.03" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="HWRQE"></td>
+                        <td data-raw="3.54" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="LWRQE"></td>
+                        <td data-raw="0.19" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.74" data-model="GraphWaveNet_weather_air" data-metric="VIS" data-indicator="LCSRQE"></td>
+                    </tr>
+                    <tr>
+                        <td class="config-cell">+Weather+Air+NWP</td>
+                        <td data-raw="1.14" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="MAE"></td>
+                        <td data-raw="0.86" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="Corr"></td>
+                        <td data-raw="0.92" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="DTW"></td>
+                        <td data-raw="277.87" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="HRQE"></td>
+                        <td data-raw="2275.56" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="LRQE"></td>
+                        <td data-raw="35.88" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="HWRQE"></td>
+                        <td data-raw="317.76" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="LWRQE"></td>
+                        <td data-raw="0.03" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.06" data-model="GraphWaveNet_weather_air_nwp" data-metric="T" data-indicator="LCSRQE"></td>
+                        <td data-raw="3710.09" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="MAE"></td>
+                        <td data-raw="0.76" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="Corr"></td>
+                        <td data-raw="2.15" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="DTW"></td>
+                        <td data-raw="0.15" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="HRQE"></td>
+                        <td data-raw="15.51" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="LRQE"></td>
+                        <td data-raw="0.03" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="HWRQE"></td>
+                        <td data-raw="3.36" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="LWRQE"></td>
+                        <td data-raw="0.53" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.56" data-model="GraphWaveNet_weather_air_nwp" data-metric="VIS" data-indicator="LCSRQE"></td>
+                    </tr>
+                    <tr>
+                        <td rowspan="4" class="model-cell">DGCRN</td>
+                        <td class="config-cell">Single</td>
+                        <td data-raw="1.57" data-model="DGCRN_single" data-metric="T" data-indicator="MAE"></td>
+                        <td data-raw="0.80" data-model="DGCRN_single" data-metric="T" data-indicator="Corr"></td>
+                        <td data-raw="2.72" data-model="DGCRN_single" data-metric="T" data-indicator="DTW"></td>
+                        <td data-raw="4048.94" data-model="DGCRN_single" data-metric="T" data-indicator="HRQE"></td>
+                        <td data-raw="2902.94" data-model="DGCRN_single" data-metric="T" data-indicator="LRQE"></td>
+                        <td data-raw="525.17" data-model="DGCRN_single" data-metric="T" data-indicator="HWRQE"></td>
+                        <td data-raw="420.56" data-model="DGCRN_single" data-metric="T" data-indicator="LWRQE"></td>
+                        <td data-raw="0.41" data-model="DGCRN_single" data-metric="T" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.04" data-model="DGCRN_single" data-metric="T" data-indicator="LCSRQE"></td>
+                        <td data-raw="4202.23" data-model="DGCRN_single" data-metric="VIS" data-indicator="MAE"></td>
+                        <td data-raw="0.70" data-model="DGCRN_single" data-metric="VIS" data-indicator="Corr"></td>
+                        <td data-raw="3.31" data-model="DGCRN_single" data-metric="VIS" data-indicator="DTW"></td>
+                        <td data-raw="0.16" data-model="DGCRN_single" data-metric="VIS" data-indicator="HRQE"></td>
+                        <td data-raw="23.08" data-model="DGCRN_single" data-metric="VIS" data-indicator="LRQE"></td>
+                        <td data-raw="0.03" data-model="DGCRN_single" data-metric="VIS" data-indicator="HWRQE"></td>
+                        <td data-raw="4.97" data-model="DGCRN_single" data-metric="VIS" data-indicator="LWRQE"></td>
+                        <td data-raw="0.32" data-model="DGCRN_single" data-metric="VIS" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.94" data-model="DGCRN_single" data-metric="VIS" data-indicator="LCSRQE"></td>
+                    </tr>
+                    <tr>
+                        <td class="config-cell">+Weather</td>
+                        <td data-raw="1.60" data-model="DGCRN_weather" data-metric="T" data-indicator="MAE"></td>
+                        <td data-raw="0.80" data-model="DGCRN_weather" data-metric="T" data-indicator="Corr"></td>
+                        <td data-raw="3.03" data-model="DGCRN_weather" data-metric="T" data-indicator="DTW"></td>
+                        <td data-raw="3130.26" data-model="DGCRN_weather" data-metric="T" data-indicator="HRQE"></td>
+                        <td data-raw="2121.86" data-model="DGCRN_weather" data-metric="T" data-indicator="LRQE"></td>
+                        <td data-raw="409.27" data-model="DGCRN_weather" data-metric="T" data-indicator="HWRQE"></td>
+                        <td data-raw="302.25" data-model="DGCRN_weather" data-metric="T" data-indicator="LWRQE"></td>
+                        <td data-raw="0.50" data-model="DGCRN_weather" data-metric="T" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.05" data-model="DGCRN_weather" data-metric="T" data-indicator="LCSRQE"></td>
+                        <td data-raw="4188.78" data-model="DGCRN_weather" data-metric="VIS" data-indicator="MAE"></td>
+                        <td data-raw="0.71" data-model="DGCRN_weather" data-metric="VIS" data-indicator="Corr"></td>
+                        <td data-raw="3.11" data-model="DGCRN_weather" data-metric="VIS" data-indicator="DTW"></td>
+                        <td data-raw="0.16" data-model="DGCRN_weather" data-metric="VIS" data-indicator="HRQE"></td>
+                        <td data-raw="17.05" data-model="DGCRN_weather" data-metric="VIS" data-indicator="LRQE"></td>
+                        <td data-raw="0.03" data-model="DGCRN_weather" data-metric="VIS" data-indicator="HWRQE"></td>
+                        <td data-raw="3.71" data-model="DGCRN_weather" data-metric="VIS" data-indicator="LWRQE"></td>
+                        <td data-raw="0.57" data-model="DGCRN_weather" data-metric="VIS" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.99" data-model="DGCRN_weather" data-metric="VIS" data-indicator="LCSRQE"></td>
+                    </tr>
+                    <tr>
+                        <td class="config-cell">+Weather+Air</td>
+                        <td data-raw="1.57" data-model="DGCRN_weather_air" data-metric="T" data-indicator="MAE"></td>
+                        <td data-raw="0.79" data-model="DGCRN_weather_air" data-metric="T" data-indicator="Corr"></td>
+                        <td data-raw="2.63" data-model="DGCRN_weather_air" data-metric="T" data-indicator="DTW"></td>
+                        <td data-raw="3758.53" data-model="DGCRN_weather_air" data-metric="T" data-indicator="HRQE"></td>
+                        <td data-raw="2411.88" data-model="DGCRN_weather_air" data-metric="T" data-indicator="LRQE"></td>
+                        <td data-raw="489.74" data-model="DGCRN_weather_air" data-metric="T" data-indicator="HWRQE"></td>
+                        <td data-raw="350.07" data-model="DGCRN_weather_air" data-metric="T" data-indicator="LWRQE"></td>
+                        <td data-raw="0.05" data-model="DGCRN_weather_air" data-metric="T" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.07" data-model="DGCRN_weather_air" data-metric="T" data-indicator="LCSRQE"></td>
+                        <td data-raw="4058.36" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="MAE"></td>
+                        <td data-raw="0.72" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="Corr"></td>
+                        <td data-raw="3.05" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="DTW"></td>
+                        <td data-raw="0.16" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="HRQE"></td>
+                        <td data-raw="18.86" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="LRQE"></td>
+                        <td data-raw="0.03" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="HWRQE"></td>
+                        <td data-raw="4.06" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="LWRQE"></td>
+                        <td data-raw="0.40" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.69" data-model="DGCRN_weather_air" data-metric="VIS" data-indicator="LCSRQE"></td>
+                    </tr>
+                    <tr>
+                        <td class="config-cell">+Weather+Air+NWP</td>
+                        <td data-raw="1.16" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="MAE"></td>
+                        <td data-raw="0.85" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="Corr"></td>
+                        <td data-raw="0.87" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="DTW"></td>
+                        <td data-raw="807.48" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="HRQE"></td>
+                        <td data-raw="2017.92" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="LRQE"></td>
+                        <td data-raw="98.35" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="HWRQE"></td>
+                        <td data-raw="289.57" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="LWRQE"></td>
+                        <td data-raw="0.42" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="HCSRQE"></td>
+                        <td data-raw="0.07" data-model="DGCRN_weather_air_nwp" data-metric="T" data-indicator="LCSRQE"></td>
+                        <td data-raw="5185.48" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="MAE"></td>
+                        <td data-raw="0.64" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="Corr"></td>
+                        <td data-raw="4.01" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="DTW"></td>
+                        <td data-raw="0.25" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="HRQE"></td>
+                        <td data-raw="30.31" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="LRQE"></td>
+                        <td data-raw="0.05" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="HWRQE"></td>
+                        <td data-raw="6.61" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="LWRQE"></td>
+                        <td data-raw="0.31" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="HCSRQE"></td>
+                        <td data-raw="1.78" data-model="DGCRN_weather_air_nwp" data-metric="VIS" data-indicator="LCSRQE"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="legend-section" style="margin-top: 20px;">
+            <div class="legend-title">Notes</div>
+            <div class="legend-content">
+                <div class="legend-item">
+                    <span>• MAE and all RQE metrics: Lower is better</span>
+                </div>
+                <div class="legend-item">
+                    <span>• Corr: Higher is better</span>
+                </div>
+                <div class="legend-item">
+                    <span>• Best/Second best are evaluated across all configurations</span>
+                </div>
+                <div class="legend-item">
+                    <span>• VIS metrics LRQE and LWRQE are scaled by 10<sup>7</sup></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const rankings = {"T": {"MAE": [["GraphWaveNet_weather_air_nwp", 1.14], ["DGCRN_weather_air_nwp", 1.16], ["DGCRN_single", 1.57], ["DGCRN_weather_air", 1.57], ["GraphWaveNet_single", 1.59], ["DGCRN_weather", 1.6], ["GraphWaveNet_weather", 1.63], ["GraphWaveNet_weather_air", 1.64]], "Corr": [["GraphWaveNet_weather_air_nwp", 0.86], ["DGCRN_weather_air_nwp", 0.85], ["DGCRN_single", 0.8], ["DGCRN_weather", 0.8], ["GraphWaveNet_single", 0.79], ["GraphWaveNet_weather", 0.79], ["DGCRN_weather_air", 0.79], ["GraphWaveNet_weather_air", 0.78]], "DTW": [["DGCRN_weather_air_nwp", 0.87], ["GraphWaveNet_weather_air_nwp", 0.92], ["DGCRN_weather_air", 2.63], ["DGCRN_single", 2.72], ["GraphWaveNet_single", 2.82], ["GraphWaveNet_weather", 2.93], ["GraphWaveNet_weather_air", 2.98], ["DGCRN_weather", 3.03]], "HRQE": [["GraphWaveNet_weather_air_nwp", 277.87], ["DGCRN_weather_air_nwp", 807.48], ["GraphWaveNet_weather", 2595.6], ["GraphWaveNet_weather_air", 2630.0], ["DGCRN_weather", 3130.26], ["DGCRN_weather_air", 3758.53], ["DGCRN_single", 4048.94], ["GraphWaveNet_single", 4110.44]], "LRQE": [["GraphWaveNet_weather", 1498.73], ["GraphWaveNet_weather_air", 1819.57], ["DGCRN_weather_air_nwp", 2017.92], ["DGCRN_weather", 2121.86], ["GraphWaveNet_single", 2130.03], ["GraphWaveNet_weather_air_nwp", 2275.56], ["DGCRN_weather_air", 2411.88], ["DGCRN_single", 2902.94]], "HWRQE": [["GraphWaveNet_weather_air_nwp", 35.88], ["DGCRN_weather_air_nwp", 98.35], ["GraphWaveNet_weather_air", 347.9], ["GraphWaveNet_weather", 355.17], ["DGCRN_weather", 409.27], ["DGCRN_weather_air", 489.74], ["DGCRN_single", 525.17], ["GraphWaveNet_single", 547.9]], "LWRQE": [["GraphWaveNet_weather", 221.01], ["GraphWaveNet_weather_air", 255.66], ["GraphWaveNet_single", 289.31], ["DGCRN_weather_air_nwp", 289.57], ["DGCRN_weather", 302.25], ["GraphWaveNet_weather_air_nwp", 317.76], ["DGCRN_weather_air", 350.07], ["DGCRN_single", 420.56]], "HCSRQE": [["GraphWaveNet_weather_air_nwp", 0.03], ["DGCRN_weather_air", 0.05], ["GraphWaveNet_single", 0.06], ["GraphWaveNet_weather_air", 0.07], ["DGCRN_single", 0.41], ["DGCRN_weather_air_nwp", 0.42], ["GraphWaveNet_weather", 0.46], ["DGCRN_weather", 0.5]], "LCSRQE": [["DGCRN_single", 0.04], ["DGCRN_weather", 0.05], ["GraphWaveNet_weather_air_nwp", 0.06], ["GraphWaveNet_single", 0.07], ["GraphWaveNet_weather", 0.07], ["DGCRN_weather_air", 0.07], ["DGCRN_weather_air_nwp", 0.07], ["GraphWaveNet_weather_air", 0.08]]}, "VIS": {"MAE": [["GraphWaveNet_weather_air_nwp", 3710.09], ["GraphWaveNet_weather", 3827.93], ["GraphWaveNet_single", 3882.29], ["GraphWaveNet_weather_air", 3936.82], ["DGCRN_weather_air", 4058.36], ["DGCRN_weather", 4188.78], ["DGCRN_single", 4202.23], ["DGCRN_weather_air_nwp", 5185.48]], "Corr": [["GraphWaveNet_weather_air_nwp", 0.76], ["GraphWaveNet_weather", 0.75], ["GraphWaveNet_single", 0.74], ["GraphWaveNet_weather_air", 0.74], ["DGCRN_weather_air", 0.72], ["DGCRN_weather", 0.71], ["DGCRN_single", 0.7], ["DGCRN_weather_air_nwp", 0.64]], "DTW": [["GraphWaveNet_weather", 2.05], ["GraphWaveNet_weather_air_nwp", 2.15], ["GraphWaveNet_weather_air", 2.22], ["GraphWaveNet_single", 2.29], ["DGCRN_weather_air", 3.05], ["DGCRN_weather", 3.11], ["DGCRN_single", 3.31], ["DGCRN_weather_air_nwp", 4.01]], "HRQE": [["GraphWaveNet_single", 0.15], ["GraphWaveNet_weather_air_nwp", 0.15], ["GraphWaveNet_weather", 0.16], ["DGCRN_single", 0.16], ["DGCRN_weather", 0.16], ["DGCRN_weather_air", 0.16], ["GraphWaveNet_weather_air", 0.18], ["DGCRN_weather_air_nwp", 0.25]], "LRQE": [["GraphWaveNet_weather", 13.62], ["GraphWaveNet_single", 14.96], ["GraphWaveNet_weather_air_nwp", 15.51], ["GraphWaveNet_weather_air", 16.44], ["DGCRN_weather", 17.05], ["DGCRN_weather_air", 18.86], ["DGCRN_single", 23.08], ["DGCRN_weather_air_nwp", 30.31]], "HWRQE": [["GraphWaveNet_single", 0.03], ["GraphWaveNet_weather", 0.03], ["GraphWaveNet_weather_air", 0.03], ["GraphWaveNet_weather_air_nwp", 0.03], ["DGCRN_single", 0.03], ["DGCRN_weather", 0.03], ["DGCRN_weather_air", 0.03], ["DGCRN_weather_air_nwp", 0.05]], "LWRQE": [["GraphWaveNet_weather", 2.92], ["GraphWaveNet_single", 3.23], ["GraphWaveNet_weather_air_nwp", 3.36], ["GraphWaveNet_weather_air", 3.54], ["DGCRN_weather", 3.71], ["DGCRN_weather_air", 4.06], ["DGCRN_single", 4.97], ["DGCRN_weather_air_nwp", 6.61]], "HCSRQE": [["GraphWaveNet_weather_air", 0.19], ["GraphWaveNet_single", 0.28], ["DGCRN_weather_air_nwp", 0.31], ["DGCRN_single", 0.32], ["GraphWaveNet_weather", 0.34], ["DGCRN_weather_air", 0.4], ["GraphWaveNet_weather_air_nwp", 0.53], ["DGCRN_weather", 0.57]], "LCSRQE": [["GraphWaveNet_weather_air_nwp", 0.56], ["DGCRN_weather_air", 0.69], ["GraphWaveNet_weather_air", 0.74], ["GraphWaveNet_single", 0.93], ["GraphWaveNet_weather", 0.94], ["DGCRN_single", 0.94], ["DGCRN_weather", 0.99], ["DGCRN_weather_air_nwp", 1.78]]}};
+
+        function formatValue(value, model, rankingList) {
+            if (!value) return '<span class="na">-</span>';
+
+            for (let i = 0; i < rankingList.length; i++) {
+                if (rankingList[i][0] === model) {
+                    if (i === 0) return '<span class="best-val">' + value + '</span>';
+                    if (i === 1) return '<span class="second-val">' + value + '</span>';
+                    break;
+                }
+            }
+            return value;
+        }
+
+        document.querySelectorAll('td[data-raw]').forEach(cell => {
+            const raw = cell.getAttribute('data-raw');
+            const model = cell.getAttribute('data-model');
+            const metric = cell.getAttribute('data-metric');
+            const indicator = cell.getAttribute('data-indicator');
+
+            if (!raw) {
+                cell.innerHTML = '<span class="na">-</span>';
+                return;
+            }
+
+            const metricRankings = rankings[metric];
+            if (metricRankings && metricRankings[indicator]) {
+                cell.innerHTML = formatValue(raw, model, metricRankings[indicator]);
+            } else {
+                cell.innerHTML = raw;
+            }
+        });
+    </script>
+</body>
+</html>

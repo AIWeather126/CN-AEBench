@@ -256,40 +256,40 @@
             </div>
             <div class="station-grid">
                 <div class="station-item">
-                    <div class="station-name">于田 (Yutian)</div>
+                    <div class="station-name">Yutian</div>
                     <div>Station: 51931</div>
                     <div>Lon: 81.65°E, Lat: 36.86°N, Alt: 1421.4m</div>
-                    <div class="station-type">城镇用地 (Urban)</div>
+                    <div class="station-type">Urban</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">皮山 (Pishan)</div>
+                    <div class="station-name">Pishan</div>
                     <div>Station: 51818</div>
                     <div>Lon: 78.28°E, Lat: 37.61°N, Alt: 1372.5m</div>
-                    <div class="station-type">城镇用地 (Urban)</div>
+                    <div class="station-type">Urban</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">策勒 (Cele)</div>
+                    <div class="station-name">Cele</div>
                     <div>Station: 51826</div>
                     <div>Lon: 80.81°E, Lat: 37.00°N, Alt: 1331.5m</div>
-                    <div class="station-type">城镇用地 (Urban)</div>
+                    <div class="station-type">Urban</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">洛浦 (Luopu)</div>
+                    <div class="station-name">Luopu</div>
                     <div>Station: 51829</div>
                     <div>Lon: 80.23°E, Lat: 37.05°N, Alt: 1304.2m</div>
-                    <div class="station-type">戈壁 (Gobi Desert)</div>
+                    <div class="station-type">Gobi Desert</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">和田 (Hetian)</div>
+                    <div class="station-name">Hetian</div>
                     <div>Station: 51828</div>
                     <div>Lon: 79.92°E, Lat: 37.12°N, Alt: 1374.5m</div>
-                    <div class="station-type">城镇用地 (Urban)</div>
+                    <div class="station-type">Urban</div>
                 </div>
                 <div class="station-item">
-                    <div class="station-name">民丰 (Minfeng)</div>
+                    <div class="station-name">Minfeng</div>
                     <div>Station: 51839</div>
                     <div>Lon: 82.69°E, Lat: 37.07°N, Alt: 1408.9m</div>
-                    <div class="station-type">城镇用地 (Urban)</div>
+                    <div class="station-type">Urban</div>
                 </div>
             </div>
         </div>
@@ -694,28 +694,39 @@
 
         // Chart 2: Visibility-PM10 Relationship
         function createChart2() {
+            // 过滤掉无效数据（避免log scale问题）
+            const validData = allData.filter(d =>
+                d.visibility > 0 &&
+                d.pm10 > 0 &&
+                d.pm25 > 0 &&
+                d.ws >= 0
+            );
+
             const trace1 = {
-                x: allData.map(d => d.visibility / 1000),
-                y: allData.map(d => d.pm10),
+                x: validData.map(d => d.visibility / 1000),
+                y: validData.map(d => d.pm10),
                 mode: 'markers',
                 type: 'scatter',
-                name: 'PM10',
+                name: 'PM10',  // 保持名称为PM10
                 marker: {
                     size: 6,
-                    color: allData.map(d => d.ws),
+                    color: validData.map(d => d.ws),
                     colorscale: 'Viridis',
                     showscale: true,
                     colorbar: {
                         title: 'Wind Speed<br>(m/s)',
-                        x: 1.02
+                        x: 1.02,
+                        len: 0.8  // 调整色条长度避免重叠
                     },
                     opacity: 0.6
-                }
+                },
+                text: validData.map(d => `PM10: ${d.pm10}<br>Vis: ${(d.visibility/1000).toFixed(2)}km<br>WS: ${d.ws}m/s`),
+                hovertemplate: '%{text}<extra></extra>'
             };
 
             const trace2 = {
-                x: allData.map(d => d.visibility / 1000),
-                y: allData.map(d => d.pm25),
+                x: validData.map(d => d.visibility / 1000),
+                y: validData.map(d => d.pm25),
                 mode: 'markers',
                 type: 'scatter',
                 name: 'PM2.5',
@@ -729,14 +740,20 @@
             const layout = {
                 xaxis: {
                     title: 'Visibility (km)',
-                    type: 'log'
+                    type: 'log',
+                    range: [-1, 2]  // 限制范围 0.1-100km
                 },
                 yaxis: {
                     title: 'Particulate Matter (μg/m³)',
-                    type: 'log'
+                    type: 'log',
+                    range: [0, 4]  // 限制范围 1-10000 μg/m³
                 },
                 height: 500,
-                margin: { l: 80, r: 180, t: 30, b: 60 }  // 增加右边距避免重叠
+                margin: { l: 80, r: 180, t: 30, b: 60 },
+                legend: {
+                    x: 0.02,
+                    y: 0.98
+                }
             };
 
             Plotly.newPlot('chart2', [trace1, trace2], layout, {responsive: true});

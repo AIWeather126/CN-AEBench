@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Performance Comparison - Academic Style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #212529;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .legend-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .legend-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-sample {
+            padding: 2px 6px;
+            border: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .filter-section {
+            background: white;
+            border: 2px solid #dee2e6;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .filter-groups {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+
+        .filter-group-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+        }
+
+        .filter-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .btn:hover {
+            background: #e9ecef;
+        }
+
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+            border-color: #0066cc;
+        }
+
+        .btn-primary:hover {
+            background: #0052a3;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th, td {
+            padding: 8px 6px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        thead th {
+            background: #e9ecef;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+        td.model-cell {
+            background: #f8f9fa;
+            font-weight: bold;
+            vertical-align: middle;
+            border-right: 2px solid #adb5bd;
+        }
+
+        .district-cell {
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+
+        .mae-col {
+            background-color: rgba(255, 243, 230, 0.3);
+        }
+
+        .corr-col {
+            background-color: rgba(230, 255, 230, 0.3);
+        }
+
+        .best-val {
+            font-weight: bold;
+        }
+
+        .second-val {
+            text-decoration: underline;
+        }
+
+        .na {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Table. Model Performance Comparison Across Districts and Metrics</h1>
+
+        <div class="legend-section">
+            <div class="legend-title">Legend</div>
+            <div class="legend-content">
+                <div class="legend-item">
+                    <span class="legend-sample best-val">Bold</span>
+                    <span>Best performance</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-sample second-val">Underline</span>
+                    <span>Second best</span>
+                </div>
+                <div class="legend-item">
+                    <span>MAE ↓</span>
+                    <span>Lower is better</span>
+                </div>
+                <div class="legend-item">
+                    <span>Corr ↑</span>
+                    <span>Higher is better</span>
+                </div>
+                <div class="legend-item">
+                    <span>Format:</span>
+                    <span>h1/h24/h48/h72/h96/h120 overall (MAE) | h1/h24/h48/h72/h96/h120 (Corr)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-title">Filter Options</div>
+            <div class="filter-groups">
+                <div class="filter-group">
+                    <div class="filter-group-title">Districts</div>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="dist_Lanzhou" value="Lanzhou" checked>
+                            <label for="dist_Lanzhou">Lanzhou</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="dist_Kunming" value="Kunming" checked>
+                            <label for="dist_Kunming">Kunming</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="dist_Harbin" value="Harbin" checked>
+                            <label for="dist_Harbin">Harbin</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="dist_Shanghai" value="Shanghai" checked>
+                            <label for="dist_Shanghai">Shanghai</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-group-title">Metrics / 指标</div>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="metric_T" value="T" checked>
+                            <label for="metric_T">T</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="metric_VIS" value="VIS" checked>
+                            <label for="metric_VIS">VIS</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="metric_P" value="P" checked>
+                            <label for="metric_P">P</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="metric_PM2_5" value="PM2.5" checked>
+                            <label for="metric_PM2_5">PM2.5</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="metric_AQI" value="AQI" checked>
+                            <label for="metric_AQI">AQI</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-buttons">
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters / 应用筛选</button>
+                <button class="btn" onclick="selectAll()">Select All / 全选</button>
+                <button class="btn" onclick="clearAll()">Clear All / 清空</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th rowspan="2">Model</th>
+                        <th rowspan="2">District</th>
+                        <th colspan="2" data-metric="T">T</th>
+                        <th colspan="2" data-metric="VIS">VIS</th>
+                        <th colspan="2" data-metric="P">P</th>
+                        <th colspan="2" data-metric="PM2.5">PM2.5</th>
+                        <th colspan="2" data-metric="AQI">AQI</th>
+                    </tr>
+                    <tr>
+                        <th class="mae-col" data-metric="T">MAE</th>
+                        <th class="corr-col" data-metric="T">Corr</th>
+                        <th class="mae-col" data-metric="VIS">MAE</th>
+                        <th class="corr-col" data-metric="VIS">Corr</th>
+                        <th class="mae-col" data-metric="P">MAE</th>
+                        <th class="corr-col" data-metric="P">Corr</th>
+                        <th class="mae-col" data-metric="PM2.5">MAE</th>
+                        <th class="corr-col" data-metric="PM2.5">Corr</th>
+                        <th class="mae-col" data-metric="AQI">MAE</th>
+                        <th class="corr-col" data-metric="AQI">Corr</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-district="Lanzhou" data-model="GraphWaveNet">
+                        <td class="model-cell model-first" data-model-name="GraphWaveNet">GraphWaveNet</td>
+                        <td class="district-cell">Lanzhou</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.55/2.79/3.19/3.39/3.59/3.74 3.13" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.86/0.73/0.71/0.69/0.68/0.67" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2537.31/4127.95/4209.66/4324.61/4481.68/4396.94 4275.51" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.84/0.73/0.71/0.70/0.70/0.72" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.25/3.20/4.08/4.12/3.90/3.77 3.59" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="P" data-raw="1.00/1.00/1.00/1.00/1.00/1.00" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="9.30/15.73/16.64/18.62/19.01/19.01 17.17" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.70/0.43/0.43/0.40/0.39/0.35" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="13.75/25.16/26.33/30.26/30.74/30.23 27.59" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.68/0.34/0.29/0.24/0.28/0.29" data-model="GraphWaveNet" data-district="Lanzhou"></td>
+                    </tr>
+                    <tr data-district="Kunming" data-model="GraphWaveNet">
+                        <td class="model-cell model-other" data-model-name="GraphWaveNet" style="display:none;">GraphWaveNet</td>
+                        <td class="district-cell">Kunming</td>
+                        <td class="mae-col" data-metric="T" data-raw="0.96/1.82/2.13/2.27/2.32/2.40 2.34" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.92/0.80/0.76/0.74/0.72/0.71" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2357.58/4645.95/5233.56/5511.15/5675.96/5829.27 4929.74" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.91/0.73/0.70/0.69/0.69/0.68" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.45/1.99/2.34/2.62/2.73/2.83 2.57" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.99/0.99/0.99/0.99/0.99/0.99" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="4.61/6.98/8.28/8.59/8.47/8.76 7.35" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.68/0.31/0.24/0.27/0.23/0.25" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="4.18/8.85/10.52/11.24/11.67/11.90 9.35" data-model="GraphWaveNet" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.73/0.33/0.20/0.17/0.17/0.14" data-model="GraphWaveNet" data-district="Kunming"></td>
+                    </tr>
+                    <tr data-district="Harbin" data-model="GraphWaveNet">
+                        <td class="model-cell model-other" data-model-name="GraphWaveNet" style="display:none;">GraphWaveNet</td>
+                        <td class="district-cell">Harbin</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.23/2.93/3.27/3.63/3.70/3.63 3.27" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.78/0.37/0.28/0.33/0.28/0.28" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="3285.29/6676.51/7177.39/7492.28/7636.04/7794.69 6305.46" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.80/0.49/0.47/0.41/0.40/0.40" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.30/3.89/4.50/5.16/5.69/5.38 4.58" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.99/0.97/0.96/0.95/0.95/0.95" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="14.48/22.73/24.40/27.89/27.88/27.71 21.18" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.73/0.30/0.31/0.33/0.25/0.26" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="17.96/28.00/30.19/32.75/33.33/33.03 26.31" data-model="GraphWaveNet" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.79/0.29/0.26/0.30/0.25/0.26" data-model="GraphWaveNet" data-district="Harbin"></td>
+                    </tr>
+                    <tr data-district="Shanghai" data-model="GraphWaveNet">
+                        <td class="model-cell model-other" data-model-name="GraphWaveNet" style="display:none;">GraphWaveNet</td>
+                        <td class="district-cell">Shanghai</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.95/2.52/2.88/3.16/3.42/3.56 2.96" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.65/0.46/0.40/0.40/0.37/0.43" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="3593.91/6165.07/6815.92/6668.18/6761.72/6900.60 6458.97" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.66/0.40/0.33/0.31/0.29/0.32" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.30/2.98/4.14/4.52/4.58/4.69 3.83" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.74/0.56/0.40/0.33/0.26/0.19" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="4.80/12.50/14.25/14.21/13.43/12.76 13.02" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.69/0.24/0.13/0.12/0.14/0.14" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="11.50/17.77/17.83/18.37/18.65/18.77 17.86" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.67/0.23/0.16/0.17/0.13/0.14" data-model="GraphWaveNet" data-district="Shanghai"></td>
+                    </tr>
+                    <tr data-district="Lanzhou" data-model="DCRNN">
+                        <td class="model-cell model-first" data-model-name="DCRNN">DCRNN</td>
+                        <td class="district-cell">Lanzhou</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.29/3.42/4.10/4.67/5.05/5.38 5.01" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.73/0.62/0.61/0.56/0.54/0.50" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2367.27/4530.13/4972.32/5494.38/5883.06/6179.08 5611.85" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.85/0.63/0.56/0.54/0.53/0.52" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.14/3.31/4.65/5.63/6.35/7.15 4.97" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="P" data-raw="1.00/0.99/0.99/0.98/0.97/0.96" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="12.07/18.42/18.25/20.09/20.41/20.56 19.47" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.52/-0.01/-0.11/-0.13/-0.10/-0.08" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="6.76/25.44/28.53/33.55/35.32/35.47 30.34" data-model="DCRNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.78/0.33/0.27/0.27/0.24/0.23" data-model="DCRNN" data-district="Lanzhou"></td>
+                    </tr>
+                    <tr data-district="Kunming" data-model="DCRNN">
+                        <td class="model-cell model-other" data-model-name="DCRNN" style="display:none;">DCRNN</td>
+                        <td class="district-cell">Kunming</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.07/2.35/2.89/3.26/3.56/3.97 3.49" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.85/0.69/0.62/0.56/0.51/0.47" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="3325.17/5365.40/6319.21/6790.14/7132.41/7099.33 7107.24" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.85/0.62/0.55/0.52/0.50/0.49" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.89/2.10/2.75/3.32/3.74/4.18 2.98" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.99/0.99/0.99/0.99/0.98/0.97" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="2.05/6.41/7.77/8.57/8.96/8.79 7.63" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.84/0.38/0.28/0.24/0.19/0.13" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="3.18/7.94/9.98/11.65/12.61/12.28 10.51" data-model="DCRNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.79/0.38/0.27/0.23/0.19/0.17" data-model="DCRNN" data-district="Kunming"></td>
+                    </tr>
+                    <tr data-district="Harbin" data-model="DCRNN">
+                        <td class="model-cell model-other" data-model-name="DCRNN" style="display:none;">DCRNN</td>
+                        <td class="district-cell">Harbin</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.75/3.78/4.25/4.69/4.89/4.86 5.13" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.72/0.29/0.25/0.23/0.20/0.18" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="3553.30/6980.55/7885.04/8465.93/8885.46/8963.57 8253.94" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.73/0.37/0.31/0.27/0.23/0.25" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.91/4.44/5.38/5.82/6.16/5.95 5.23" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.88/0.90/0.88/0.85/0.82/0.78" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="7.11/20.17/22.75/25.01/25.63/25.88 23.22" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.79/0.22/0.10/0.06/0.06/0.03" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="11.23/25.66/31.32/35.83/36.01/35.44 31.95" data-model="DCRNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.70/0.15/0.09/0.09/0.09/0.11" data-model="DCRNN" data-district="Harbin"></td>
+                    </tr>
+                    <tr data-district="Shanghai" data-model="DCRNN">
+                        <td class="model-cell model-other" data-model-name="DCRNN" style="display:none;">DCRNN</td>
+                        <td class="district-cell">Shanghai</td>
+                        <td class="mae-col" data-metric="T" data-raw="6.31/5.73/5.20/5.27/5.24/5.20 5.44" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.16/-0.10/0.02/0.01/0.04/0.01" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2089.60/6390.02/7699.32/7616.11/7853.54/8170.48 7199.63" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.71/0.41/0.38/0.35/0.32/0.33" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.61/2.94/4.07/4.84/5.63/6.22 4.30" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.57/0.22/0.22/0.22/0.22/0.20" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="3.19/13.50/15.72/16.06/16.40/16.36 14.91" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.67/0.23/0.21/0.20/0.20/0.19" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="18.62/21.13/20.11/21.16/20.18/20.76 20.44" data-model="DCRNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.31/0.01/0.16/0.15/0.08/-0.06" data-model="DCRNN" data-district="Shanghai"></td>
+                    </tr>
+                    <tr data-district="Lanzhou" data-model="BigST">
+                        <td class="model-cell model-first" data-model-name="BigST">BigST</td>
+                        <td class="district-cell">Lanzhou</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.71/3.44/4.52/5.26/5.78/6.31 6.02" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.86/0.72/0.71/0.70/0.69/0.68" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2475.09/4271.43/4765.91/5096.31/5343.33/5557.98 5212.93" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.84/0.73/0.71/0.69/0.68/0.67" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="P" data-raw="2.52/3.48/3.76/3.76/3.75/3.81 3.86" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="P" data-raw="1.00/1.00/1.00/1.00/1.00/1.00" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="9.63/17.10/18.09/18.52/18.54/18.90 18.09" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.72/0.49/0.50/0.48/0.47/0.45" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="14.06/27.28/29.00/29.44/29.48/29.90 29.01" data-model="BigST" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.70/0.38/0.39/0.38/0.38/0.37" data-model="BigST" data-district="Lanzhou"></td>
+                    </tr>
+                    <tr data-district="Kunming" data-model="BigST">
+                        <td class="model-cell model-other" data-model-name="BigST" style="display:none;">BigST</td>
+                        <td class="district-cell">Kunming</td>
+                        <td class="mae-col" data-metric="T" data-raw="4.61/2.72/5.04/4.52/5.20/7.91 4.04" data-model="BigST" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="T" data-raw="-0.01/0.41/-0.06/-0.30/-0.29/-0.17" data-model="BigST" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="3525.78/6870.72/4843.60/5087.51/7983.20/4695.30 5281.00" data-model="BigST" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.83/0.70/0.72/0.71/0.49/0.72" data-model="BigST" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.90/1.41/2.01/2.40/1.52/3.30 2.13" data-model="BigST" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="P" data-raw="1.00/0.99/1.00/1.00/1.00/1.00" data-model="BigST" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="3.49/3.12/3.75/2.97/12.35/8.55 6.46" data-model="BigST" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.43/0.25/0.29/0.36/0.60/0.28" data-model="BigST" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="5.05/4.61/9.32/6.58/11.19/8.21 7.94" data-model="BigST" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.16/0.31/-0.15/-0.25/-0.02/0.25" data-model="BigST" data-district="Kunming"></td>
+                    </tr>
+                    <tr data-district="Harbin" data-model="BigST">
+                        <td class="model-cell model-other" data-model-name="BigST" style="display:none;">BigST</td>
+                        <td class="district-cell">Harbin</td>
+                        <td class="mae-col" data-metric="T" data-raw="3.88/5.50/3.29/5.68/8.08/15.91 5.99" data-model="BigST" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="T" data-raw="-0.27/-0.19/0.10/0.27/0.25/0.01" data-model="BigST" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="9949.51/11364.97/8292.81/12374.55/8694.83/4242.65 8770.52" data-model="BigST" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.35/-0.40/-0.62/-0.01/0.19/-0.07" data-model="BigST" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="P" data-raw="3.83/2.25/6.96/2.91/3.93/4.13 3.84" data-model="BigST" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.93/0.95/0.96/0.88/0.95/0.94" data-model="BigST" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="8.69/4.48/12.25/5.77/7.19/2.87 13.39" data-model="BigST" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.07/0.59/0.36/-0.28/0.15/0.48" data-model="BigST" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="24.05/9.55/15.45/15.78/22.20/16.78 21.79" data-model="BigST" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.40/-0.33/-0.12/0.12/0.30/0.25" data-model="BigST" data-district="Harbin"></td>
+                    </tr>
+                    <tr data-district="Shanghai" data-model="BigST">
+                        <td class="model-cell model-other" data-model-name="BigST" style="display:none;">BigST</td>
+                        <td class="district-cell">Shanghai</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.77/3.00/4.01/4.71/5.23/5.65 5.22" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.64/0.45/0.44/0.40/0.40/0.41" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2524.84/5974.94/6566.66/6725.88/6916.79/7096.81 6775.73" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.66/0.42/0.37/0.36/0.34/0.34" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.48/3.60/4.87/5.22/5.54/5.65 5.21" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.61/0.46/0.51/0.44/0.36/0.39" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="9.78/13.69/14.28/13.73/14.03/14.47 14.30" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.35/0.20/0.14/0.15/0.19/0.12" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="12.49/18.05/18.45/18.05/18.40/18.86 18.53" data-model="BigST" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.35/0.19/0.21/0.17/0.21/0.20" data-model="BigST" data-district="Shanghai"></td>
+                    </tr>
+                    <tr data-district="Lanzhou" data-model="DGCRN">
+                        <td class="model-cell model-first" data-model-name="DGCRN">DGCRN</td>
+                        <td class="district-cell">Lanzhou</td>
+                        <td class="mae-col" data-metric="T" data-raw="0.58/3.15/3.80/4.13/4.47/4.84 3.68" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.94/0.74/0.68/0.63/0.60/0.58" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="1588.61/4872.16/5224.39/5739.48/6373.64/6873.69 5405.36" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.89/0.69/0.65/0.61/0.56/0.53" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.42/11.35/16.44/17.70/17.93/17.90 14.64" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="P" data-raw="1.00/0.97/0.95/0.95/0.95/0.95" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="3.96/16.88/18.53/20.27/20.42/20.53 18.46" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.88/0.28/0.31/0.33/0.36/0.38" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="8.01/36.03/36.08/37.67/37.03/35.96 36.19" data-model="DGCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.80/0.13/0.06/0.06/0.06/0.06" data-model="DGCRN" data-district="Lanzhou"></td>
+                    </tr>
+                    <tr data-district="Kunming" data-model="DGCRN">
+                        <td class="model-cell model-other" data-model-name="DGCRN" style="display:none;">DGCRN</td>
+                        <td class="district-cell">Kunming</td>
+                        <td class="mae-col" data-metric="T" data-raw="0.53/2.02/2.60/2.98/3.19/3.34 2.61" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.95/0.78/0.74/0.69/0.65/0.62" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="1891.61/5433.26/6072.86/6464.06/6845.77/7269.06 5955.41" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.91/0.68/0.61/0.57/0.53/0.50" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.86/6.69/6.68/7.47/8.29/9.14 6.76" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.99/0.98/0.97/0.95/0.94/0.92" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="1.89/9.23/9.60/10.14/10.47/10.67 9.65" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.87/0.12/0.02/0.02/0.01/0.02" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="2.60/11.15/11.58/12.20/12.52/12.92 11.72" data-model="DGCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.87/0.06/-0.10/-0.10/-0.10/-0.10" data-model="DGCRN" data-district="Kunming"></td>
+                    </tr>
+                    <tr data-district="Harbin" data-model="DGCRN">
+                        <td class="model-cell model-other" data-model-name="DGCRN" style="display:none;">DGCRN</td>
+                        <td class="district-cell">Harbin</td>
+                        <td class="mae-col" data-metric="T" data-raw="0.59/6.54/8.56/9.26/9.28/9.23 7.81" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.91/0.21/0.22/0.22/0.22/0.22" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2434.79/8593.80/8650.74/8679.95/8776.43/8918.45 8524.78" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.84/0.11/0.18/0.17/0.17/0.16" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.27/9.90/7.87/8.57/10.55/8.16 8.23" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="P" data-raw="1.00/0.96/0.81/0.55/0.35/0.22" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="8.00/23.45/25.04/26.16/26.88/26.66 25.03" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.87/-0.01/-0.03/-0.04/-0.04/-0.05" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="6.12/29.73/29.27/30.32/31.13/30.65 29.43" data-model="DGCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.89/0.04/0.02/-0.01/-0.00/0.02" data-model="DGCRN" data-district="Harbin"></td>
+                    </tr>
+                    <tr data-district="Shanghai" data-model="DGCRN">
+                        <td class="model-cell model-other" data-model-name="DGCRN" style="display:none;">DGCRN</td>
+                        <td class="district-cell">Shanghai</td>
+                        <td class="mae-col" data-metric="T" data-raw="0.44/2.69/3.53/4.58/5.30/5.54 3.90" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.84/0.49/0.40/0.34/0.31/0.32" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2062.01/7521.25/7408.31/7436.03/7689.77/7825.05 7339.86" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.72/0.20/0.22/0.22/0.22/0.24" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.40/4.16/4.96/5.41/5.67/5.93 4.90" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.78/-0.01/-0.08/-0.04/-0.01/0.01" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="2.69/13.94/16.08/17.26/19.75/20.91 16.24" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.77/0.23/0.14/0.03/0.03/0.01" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="3.67/19.55/21.01/20.25/19.79/19.35 19.60" data-model="DGCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.79/-0.10/-0.15/-0.07/-0.03/-0.05" data-model="DGCRN" data-district="Shanghai"></td>
+                    </tr>
+                    <tr data-district="Lanzhou" data-model="STPGNN">
+                        <td class="model-cell model-first" data-model-name="STPGNN">STPGNN</td>
+                        <td class="district-cell">Lanzhou</td>
+                        <td class="mae-col" data-metric="T" data-raw="0.86/2.74/3.49/3.90/4.05/4.26 3.42" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.92/0.71/0.67/0.64/0.63/0.62" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2040.24/4268.50/4585.12/4931.79/5174.16/5128.86 4689.50" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.88/0.73/0.70/0.70/0.70/0.70" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.54/2.83/3.82/4.10/4.09/4.00 3.50" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="P" data-raw="1.00/1.00/1.00/1.00/1.00/1.00" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="5.40/16.11/17.26/19.23/20.35/20.21 17.78" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.82/0.44/0.43/0.41/0.39/0.41" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="8.42/25.01/27.32/31.45/32.24/32.41 28.56" data-model="STPGNN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.80/0.35/0.33/0.30/0.30/0.30" data-model="STPGNN" data-district="Lanzhou"></td>
+                    </tr>
+                    <tr data-district="Kunming" data-model="STPGNN">
+                        <td class="model-cell model-other" data-model-name="STPGNN" style="display:none;">STPGNN</td>
+                        <td class="district-cell">Kunming</td>
+                        <td class="mae-col" data-metric="T" data-raw="0.64/1.96/2.41/2.57/2.67/2.82 2.32" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.94/0.77/0.73/0.70/0.68/0.67" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2021.86/4470.57/5068.11/5406.18/5566.81/5648.29 5093.95" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.91/0.74/0.71/0.69/0.68/0.67" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.86/2.01/2.46/2.73/2.80/2.90 2.44" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.99/0.99/0.99/0.99/0.99/0.99" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="3.44/6.37/7.43/8.15/8.45/8.35 7.41" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.75/0.41/0.33/0.30/0.29/0.26" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="3.68/7.96/9.82/10.97/10.85/10.70 9.53" data-model="STPGNN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.83/0.44/0.36/0.34/0.30/0.28" data-model="STPGNN" data-district="Kunming"></td>
+                    </tr>
+                    <tr data-district="Harbin" data-model="STPGNN">
+                        <td class="model-cell model-other" data-model-name="STPGNN" style="display:none;">STPGNN</td>
+                        <td class="district-cell">Harbin</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.37/3.02/3.40/3.57/3.79/3.69 3.36" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.81/0.36/0.31/0.32/0.32/0.32" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="3089.77/6236.85/6850.02/7143.92/7291.57/7419.91 6765.60" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.82/0.52/0.49/0.45/0.45/0.44" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.21/3.76/4.72/5.35/5.51/5.13 4.55" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.99/0.97/0.97/0.96/0.96/0.96" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="8.36/18.72/21.42/23.18/23.33/23.29 21.64" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.79/0.34/0.35/0.35/0.31/0.32" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="7.30/23.42/26.86/28.61/28.54/28.44 26.58" data-model="STPGNN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.84/0.33/0.33/0.31/0.26/0.27" data-model="STPGNN" data-district="Harbin"></td>
+                    </tr>
+                    <tr data-district="Shanghai" data-model="STPGNN">
+                        <td class="model-cell model-other" data-model-name="STPGNN" style="display:none;">STPGNN</td>
+                        <td class="district-cell">Shanghai</td>
+                        <td class="mae-col" data-metric="T" data-raw="1.09/2.30/2.96/3.30/3.58/3.74 3.02" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.74/0.43/0.35/0.28/0.25/0.27" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2590.91/6080.46/6962.85/6950.32/7256.80/7270.27 6713.29" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.69/0.37/0.33/0.30/0.32/0.34" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="P" data-raw="1.68/2.99/4.23/4.63/5.11/5.03 4.06" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.79/0.43/0.25/0.18/0.11/0.13" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="3.84/12.46/13.85/13.99/14.08/14.65 13.21" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.70/0.23/0.13/0.12/0.14/0.14" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="5.68/16.49/17.96/17.40/17.61/17.88 17.00" data-model="STPGNN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.70/0.26/0.18/0.19/0.20/0.21" data-model="STPGNN" data-district="Shanghai"></td>
+                    </tr>
+                    <tr data-district="Lanzhou" data-model="MegaCRN">
+                        <td class="model-cell model-first" data-model-name="MegaCRN">MegaCRN</td>
+                        <td class="district-cell">Lanzhou</td>
+                        <td class="mae-col" data-metric="T" data-raw="7.79/7.06/7.15/7.27/7.32/7.28 7.81" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="T" data-raw="-0.81/-0.20/0.17/0.21/0.22/0.20" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="1619.79/4248.84/4663.89/5000.19/5221.28/5430.20 4847.11" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.88/0.70/0.67/0.66/0.64/0.63" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.37/2.92/3.58/4.01/4.23/4.65 3.57" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="P" data-raw="1.00/1.00/1.00/1.00/1.00/0.99" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="14.12/16.51/17.72/20.24/20.85/20.71 18.82" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.46/0.43/0.42/0.38/0.40/0.40" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="29.05/28.81/29.43/33.23/33.75/32.85 32.21" data-model="MegaCRN" data-district="Lanzhou"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="-0.42/-0.15/-0.15/-0.13/-0.10/-0.07" data-model="MegaCRN" data-district="Lanzhou"></td>
+                    </tr>
+                    <tr data-district="Kunming" data-model="MegaCRN">
+                        <td class="model-cell model-other" data-model-name="MegaCRN" style="display:none;">MegaCRN</td>
+                        <td class="district-cell">Kunming</td>
+                        <td class="mae-col" data-metric="T" data-raw="3.52/5.04/5.05/4.94/4.86/4.85 4.95" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.76/0.66/0.64/0.63/0.62/0.61" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="1985.27/4799.68/5443.44/5872.68/6101.91/6165.25 5797.86" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.90/0.73/0.68/0.66/0.64/0.63" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="P" data-raw="0.66/1.99/2.62/3.31/4.21/5.47 3.13" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.99/0.99/0.99/0.98/0.98/0.97" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="7.67/9.09/9.51/10.23/10.47/10.71 9.89" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.80/0.38/0.31/0.29/0.27/0.24" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="9.46/10.73/11.22/12.20/12.53/12.52 11.56" data-model="MegaCRN" data-district="Kunming"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="-0.62/0.24/0.03/0.02/-0.01/-0.01" data-model="MegaCRN" data-district="Kunming"></td>
+                    </tr>
+                    <tr data-district="Harbin" data-model="MegaCRN">
+                        <td class="model-cell model-other" data-model-name="MegaCRN" style="display:none;">MegaCRN</td>
+                        <td class="district-cell">Harbin</td>
+                        <td class="mae-col" data-metric="T" data-raw="12.52/10.05/8.32/8.38/8.13/8.07 9.84" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.56/0.01/0.02/0.02/-0.00/-0.01" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="6483.53/8379.95/8867.01/9198.31/9368.77/9754.55 8975.73" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.48/0.32/0.27/0.25/0.25/0.22" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="P" data-raw="8.36/9.52/9.40/9.29/9.12/8.82 8.93" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.87/0.80/0.79/0.79/0.78/0.78" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="40.91/23.22/24.30/25.78/26.19/25.75 24.89" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.22/0.22/0.17/0.17/0.15/0.13" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="25.60/28.30/29.61/30.91/31.44/31.09 29.96" data-model="MegaCRN" data-district="Harbin"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="0.38/0.26/0.25/0.24/0.24/0.23" data-model="MegaCRN" data-district="Harbin"></td>
+                    </tr>
+                    <tr data-district="Shanghai" data-model="MegaCRN">
+                        <td class="model-cell model-other" data-model-name="MegaCRN" style="display:none;">MegaCRN</td>
+                        <td class="district-cell">Shanghai</td>
+                        <td class="mae-col" data-metric="T" data-raw="5.51/5.74/6.06/6.30/6.53/6.72 6.64" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="T" data-raw="0.62/0.43/0.36/0.34/0.32/0.33" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="VIS" data-raw="2341.23/6664.35/8211.36/8452.16/8484.44/8386.15 7735.14" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="VIS" data-raw="0.71/0.37/0.29/0.25/0.26/0.27" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="P" data-raw="7.37/5.60/5.88/6.05/6.24/6.27 6.04" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="P" data-raw="0.41/0.45/0.45/0.41/0.39/0.40" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="PM2.5" data-raw="2.59/12.72/14.55/14.77/14.57/14.95 13.68" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="PM2.5" data-raw="0.77/0.28/0.21/0.20/0.18/0.18" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="mae-col" data-metric="AQI" data-raw="19.54/27.30/26.58/26.02/24.73/24.53 26.24" data-model="MegaCRN" data-district="Shanghai"></td>
+                        <td class="corr-col" data-metric="AQI" data-raw="-0.03/-0.13/-0.08/-0.06/-0.06/-0.09" data-model="MegaCRN" data-district="Shanghai"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const rankings = {"Lanzhou": {"T": {"MAE": {"0": [["DGCRN", 0.58], ["STPGNN", 0.86], ["DCRNN", 1.29], ["GraphWaveNet", 1.55], ["BigST", 1.71], ["MegaCRN", 7.79]], "1": [["STPGNN", 2.74], ["GraphWaveNet", 2.79], ["DGCRN", 3.15], ["DCRNN", 3.42], ["BigST", 3.44], ["MegaCRN", 7.06]], "2": [["GraphWaveNet", 3.19], ["STPGNN", 3.49], ["DGCRN", 3.8], ["DCRNN", 4.1], ["BigST", 4.52], ["MegaCRN", 7.15]], "3": [["GraphWaveNet", 3.39], ["STPGNN", 3.9], ["DGCRN", 4.13], ["DCRNN", 4.67], ["BigST", 5.26], ["MegaCRN", 7.27]], "4": [["GraphWaveNet", 3.59], ["STPGNN", 4.05], ["DGCRN", 4.47], ["DCRNN", 5.05], ["BigST", 5.78], ["MegaCRN", 7.32]], "5": [["GraphWaveNet", 3.74], ["STPGNN", 4.26], ["DGCRN", 4.84], ["DCRNN", 5.38], ["BigST", 6.31], ["MegaCRN", 7.28]], "6": [["GraphWaveNet", 3.13], ["STPGNN", 3.42], ["DGCRN", 3.68], ["DCRNN", 5.01], ["BigST", 6.02], ["MegaCRN", 7.81]]}, "Corr": {"0": [["DGCRN", 0.94], ["STPGNN", 0.92], ["GraphWaveNet", 0.86], ["BigST", 0.86], ["DCRNN", 0.73], ["MegaCRN", -0.81]], "1": [["DGCRN", 0.74], ["GraphWaveNet", 0.73], ["BigST", 0.72], ["STPGNN", 0.71], ["DCRNN", 0.62], ["MegaCRN", -0.2]], "2": [["GraphWaveNet", 0.71], ["BigST", 0.71], ["DGCRN", 0.68], ["STPGNN", 0.67], ["DCRNN", 0.61], ["MegaCRN", 0.17]], "3": [["BigST", 0.7], ["GraphWaveNet", 0.69], ["STPGNN", 0.64], ["DGCRN", 0.63], ["DCRNN", 0.56], ["MegaCRN", 0.21]], "4": [["BigST", 0.69], ["GraphWaveNet", 0.68], ["STPGNN", 0.63], ["DGCRN", 0.6], ["DCRNN", 0.54], ["MegaCRN", 0.22]], "5": [["BigST", 0.68], ["GraphWaveNet", 0.67], ["STPGNN", 0.62], ["DGCRN", 0.58], ["DCRNN", 0.5], ["MegaCRN", 0.2]]}}, "VIS": {"MAE": {"0": [["DGCRN", 1588.61], ["MegaCRN", 1619.79], ["STPGNN", 2040.24], ["DCRNN", 2367.27], ["BigST", 2475.09], ["GraphWaveNet", 2537.31]], "1": [["GraphWaveNet", 4127.95], ["MegaCRN", 4248.84], ["STPGNN", 4268.5], ["BigST", 4271.43], ["DCRNN", 4530.13], ["DGCRN", 4872.16]], "2": [["GraphWaveNet", 4209.66], ["STPGNN", 4585.12], ["MegaCRN", 4663.89], ["BigST", 4765.91], ["DCRNN", 4972.32], ["DGCRN", 5224.39]], "3": [["GraphWaveNet", 4324.61], ["STPGNN", 4931.79], ["MegaCRN", 5000.19], ["BigST", 5096.31], ["DCRNN", 5494.38], ["DGCRN", 5739.48]], "4": [["GraphWaveNet", 4481.68], ["STPGNN", 5174.16], ["MegaCRN", 5221.28], ["BigST", 5343.33], ["DCRNN", 5883.06], ["DGCRN", 6373.64]], "5": [["GraphWaveNet", 4396.94], ["STPGNN", 5128.86], ["MegaCRN", 5430.2], ["BigST", 5557.98], ["DCRNN", 6179.08], ["DGCRN", 6873.69]], "6": [["GraphWaveNet", 4275.51], ["STPGNN", 4689.5], ["MegaCRN", 4847.11], ["BigST", 5212.93], ["DGCRN", 5405.36], ["DCRNN", 5611.85]]}, "Corr": {"0": [["DGCRN", 0.89], ["STPGNN", 0.88], ["MegaCRN", 0.88], ["DCRNN", 0.85], ["GraphWaveNet", 0.84], ["BigST", 0.84]], "1": [["GraphWaveNet", 0.73], ["BigST", 0.73], ["STPGNN", 0.73], ["MegaCRN", 0.7], ["DGCRN", 0.69], ["DCRNN", 0.63]], "2": [["GraphWaveNet", 0.71], ["BigST", 0.71], ["STPGNN", 0.7], ["MegaCRN", 0.67], ["DGCRN", 0.65], ["DCRNN", 0.56]], "3": [["GraphWaveNet", 0.7], ["STPGNN", 0.7], ["BigST", 0.69], ["MegaCRN", 0.66], ["DGCRN", 0.61], ["DCRNN", 0.54]], "4": [["GraphWaveNet", 0.7], ["STPGNN", 0.7], ["BigST", 0.68], ["MegaCRN", 0.64], ["DGCRN", 0.56], ["DCRNN", 0.53]], "5": [["GraphWaveNet", 0.72], ["STPGNN", 0.7], ["BigST", 0.67], ["MegaCRN", 0.63], ["DGCRN", 0.53], ["DCRNN", 0.52]]}}, "P": {"MAE": {"0": [["MegaCRN", 0.37], ["DGCRN", 0.42], ["STPGNN", 0.54], ["DCRNN", 1.14], ["GraphWaveNet", 1.25], ["BigST", 2.52]], "1": [["STPGNN", 2.83], ["MegaCRN", 2.92], ["GraphWaveNet", 3.2], ["DCRNN", 3.31], ["BigST", 3.48], ["DGCRN", 11.35]], "2": [["MegaCRN", 3.58], ["BigST", 3.76], ["STPGNN", 3.82], ["GraphWaveNet", 4.08], ["DCRNN", 4.65], ["DGCRN", 16.44]], "3": [["BigST", 3.76], ["MegaCRN", 4.01], ["STPGNN", 4.1], ["GraphWaveNet", 4.12], ["DCRNN", 5.63], ["DGCRN", 17.7]], "4": [["BigST", 3.75], ["GraphWaveNet", 3.9], ["STPGNN", 4.09], ["MegaCRN", 4.23], ["DCRNN", 6.35], ["DGCRN", 17.93]], "5": [["GraphWaveNet", 3.77], ["BigST", 3.81], ["STPGNN", 4.0], ["MegaCRN", 4.65], ["DCRNN", 7.15], ["DGCRN", 17.9]], "6": [["STPGNN", 3.5], ["MegaCRN", 3.57], ["GraphWaveNet", 3.59], ["BigST", 3.86], ["DCRNN", 4.97], ["DGCRN", 14.64]]}, "Corr": {"0": [["GraphWaveNet", 1.0], ["DCRNN", 1.0], ["BigST", 1.0], ["DGCRN", 1.0], ["STPGNN", 1.0], ["MegaCRN", 1.0]], "1": [["GraphWaveNet", 1.0], ["BigST", 1.0], ["STPGNN", 1.0], ["MegaCRN", 1.0], ["DCRNN", 0.99], ["DGCRN", 0.97]], "2": [["GraphWaveNet", 1.0], ["BigST", 1.0], ["STPGNN", 1.0], ["MegaCRN", 1.0], ["DCRNN", 0.99], ["DGCRN", 0.95]], "3": [["GraphWaveNet", 1.0], ["BigST", 1.0], ["STPGNN", 1.0], ["MegaCRN", 1.0], ["DCRNN", 0.98], ["DGCRN", 0.95]], "4": [["GraphWaveNet", 1.0], ["BigST", 1.0], ["STPGNN", 1.0], ["MegaCRN", 1.0], ["DCRNN", 0.97], ["DGCRN", 0.95]], "5": [["GraphWaveNet", 1.0], ["BigST", 1.0], ["STPGNN", 1.0], ["MegaCRN", 0.99], ["DCRNN", 0.96], ["DGCRN", 0.95]]}}, "PM2.5": {"MAE": {"0": [["DGCRN", 3.96], ["STPGNN", 5.4], ["GraphWaveNet", 9.3], ["BigST", 9.63], ["DCRNN", 12.07], ["MegaCRN", 14.12]], "1": [["GraphWaveNet", 15.73], ["STPGNN", 16.11], ["MegaCRN", 16.51], ["DGCRN", 16.88], ["BigST", 17.1], ["DCRNN", 18.42]], "2": [["GraphWaveNet", 16.64], ["STPGNN", 17.26], ["MegaCRN", 17.72], ["BigST", 18.09], ["DCRNN", 18.25], ["DGCRN", 18.53]], "3": [["BigST", 18.52], ["GraphWaveNet", 18.62], ["STPGNN", 19.23], ["DCRNN", 20.09], ["MegaCRN", 20.24], ["DGCRN", 20.27]], "4": [["BigST", 18.54], ["GraphWaveNet", 19.01], ["STPGNN", 20.35], ["DCRNN", 20.41], ["DGCRN", 20.42], ["MegaCRN", 20.85]], "5": [["BigST", 18.9], ["GraphWaveNet", 19.01], ["STPGNN", 20.21], ["DGCRN", 20.53], ["DCRNN", 20.56], ["MegaCRN", 20.71]], "6": [["GraphWaveNet", 17.17], ["STPGNN", 17.78], ["BigST", 18.09], ["DGCRN", 18.46], ["MegaCRN", 18.82], ["DCRNN", 19.47]]}, "Corr": {"0": [["DGCRN", 0.88], ["STPGNN", 0.82], ["BigST", 0.72], ["GraphWaveNet", 0.7], ["DCRNN", 0.52], ["MegaCRN", 0.46]], "1": [["BigST", 0.49], ["STPGNN", 0.44], ["GraphWaveNet", 0.43], ["MegaCRN", 0.43], ["DGCRN", 0.28], ["DCRNN", -0.01]], "2": [["BigST", 0.5], ["GraphWaveNet", 0.43], ["STPGNN", 0.43], ["MegaCRN", 0.42], ["DGCRN", 0.31], ["DCRNN", -0.11]], "3": [["BigST", 0.48], ["STPGNN", 0.41], ["GraphWaveNet", 0.4], ["MegaCRN", 0.38], ["DGCRN", 0.33], ["DCRNN", -0.13]], "4": [["BigST", 0.47], ["MegaCRN", 0.4], ["GraphWaveNet", 0.39], ["STPGNN", 0.39], ["DGCRN", 0.36], ["DCRNN", -0.1]], "5": [["BigST", 0.45], ["STPGNN", 0.41], ["MegaCRN", 0.4], ["DGCRN", 0.38], ["GraphWaveNet", 0.35], ["DCRNN", -0.08]]}}, "AQI": {"MAE": {"0": [["DCRNN", 6.76], ["DGCRN", 8.01], ["STPGNN", 8.42], ["GraphWaveNet", 13.75], ["BigST", 14.06], ["MegaCRN", 29.05]], "1": [["STPGNN", 25.01], ["GraphWaveNet", 25.16], ["DCRNN", 25.44], ["BigST", 27.28], ["MegaCRN", 28.81], ["DGCRN", 36.03]], "2": [["GraphWaveNet", 26.33], ["STPGNN", 27.32], ["DCRNN", 28.53], ["BigST", 29.0], ["MegaCRN", 29.43], ["DGCRN", 36.08]], "3": [["BigST", 29.44], ["GraphWaveNet", 30.26], ["STPGNN", 31.45], ["MegaCRN", 33.23], ["DCRNN", 33.55], ["DGCRN", 37.67]], "4": [["BigST", 29.48], ["GraphWaveNet", 30.74], ["STPGNN", 32.24], ["MegaCRN", 33.75], ["DCRNN", 35.32], ["DGCRN", 37.03]], "5": [["BigST", 29.9], ["GraphWaveNet", 30.23], ["STPGNN", 32.41], ["MegaCRN", 32.85], ["DCRNN", 35.47], ["DGCRN", 35.96]], "6": [["GraphWaveNet", 27.59], ["STPGNN", 28.56], ["BigST", 29.01], ["DCRNN", 30.34], ["MegaCRN", 32.21], ["DGCRN", 36.19]]}, "Corr": {"0": [["DGCRN", 0.8], ["STPGNN", 0.8], ["DCRNN", 0.78], ["BigST", 0.7], ["GraphWaveNet", 0.68], ["MegaCRN", -0.42]], "1": [["BigST", 0.38], ["STPGNN", 0.35], ["GraphWaveNet", 0.34], ["DCRNN", 0.33], ["DGCRN", 0.13], ["MegaCRN", -0.15]], "2": [["BigST", 0.39], ["STPGNN", 0.33], ["GraphWaveNet", 0.29], ["DCRNN", 0.27], ["DGCRN", 0.06], ["MegaCRN", -0.15]], "3": [["BigST", 0.38], ["STPGNN", 0.3], ["DCRNN", 0.27], ["GraphWaveNet", 0.24], ["DGCRN", 0.06], ["MegaCRN", -0.13]], "4": [["BigST", 0.38], ["STPGNN", 0.3], ["GraphWaveNet", 0.28], ["DCRNN", 0.24], ["DGCRN", 0.06], ["MegaCRN", -0.1]], "5": [["BigST", 0.37], ["STPGNN", 0.3], ["GraphWaveNet", 0.29], ["DCRNN", 0.23], ["DGCRN", 0.06], ["MegaCRN", -0.07]]}}}, "Kunming": {"T": {"MAE": {"0": [["DGCRN", 0.53], ["STPGNN", 0.64], ["GraphWaveNet", 0.96], ["DCRNN", 1.07], ["MegaCRN", 3.52], ["BigST", 4.61]], "1": [["GraphWaveNet", 1.82], ["STPGNN", 1.96], ["DGCRN", 2.02], ["DCRNN", 2.35], ["BigST", 2.72], ["MegaCRN", 5.04]], "2": [["GraphWaveNet", 2.13], ["STPGNN", 2.41], ["DGCRN", 2.6], ["DCRNN", 2.89], ["BigST", 5.04], ["MegaCRN", 5.05]], "3": [["GraphWaveNet", 2.27], ["STPGNN", 2.57], ["DGCRN", 2.98], ["DCRNN", 3.26], ["BigST", 4.52], ["MegaCRN", 4.94]], "4": [["GraphWaveNet", 2.32], ["STPGNN", 2.67], ["DGCRN", 3.19], ["DCRNN", 3.56], ["MegaCRN", 4.86], ["BigST", 5.2]], "5": [["GraphWaveNet", 2.4], ["STPGNN", 2.82], ["DGCRN", 3.34], ["DCRNN", 3.97], ["MegaCRN", 4.85], ["BigST", 7.91]], "6": [["STPGNN", 2.32], ["GraphWaveNet", 2.34], ["DGCRN", 2.61], ["DCRNN", 3.49], ["BigST", 4.04], ["MegaCRN", 4.95]]}, "Corr": {"0": [["DGCRN", 0.95], ["STPGNN", 0.94], ["GraphWaveNet", 0.92], ["DCRNN", 0.85], ["MegaCRN", 0.76], ["BigST", -0.01]], "1": [["GraphWaveNet", 0.8], ["DGCRN", 0.78], ["STPGNN", 0.77], ["DCRNN", 0.69], ["MegaCRN", 0.66], ["BigST", 0.41]], "2": [["GraphWaveNet", 0.76], ["DGCRN", 0.74], ["STPGNN", 0.73], ["MegaCRN", 0.64], ["DCRNN", 0.62], ["BigST", -0.06]], "3": [["GraphWaveNet", 0.74], ["STPGNN", 0.7], ["DGCRN", 0.69], ["MegaCRN", 0.63], ["DCRNN", 0.56], ["BigST", -0.3]], "4": [["GraphWaveNet", 0.72], ["STPGNN", 0.68], ["DGCRN", 0.65], ["MegaCRN", 0.62], ["DCRNN", 0.51], ["BigST", -0.29]], "5": [["GraphWaveNet", 0.71], ["STPGNN", 0.67], ["DGCRN", 0.62], ["MegaCRN", 0.61], ["DCRNN", 0.47], ["BigST", -0.17]]}}, "VIS": {"MAE": {"0": [["DGCRN", 1891.61], ["MegaCRN", 1985.27], ["STPGNN", 2021.86], ["GraphWaveNet", 2357.58], ["DCRNN", 3325.17], ["BigST", 3525.78]], "1": [["STPGNN", 4470.57], ["GraphWaveNet", 4645.95], ["MegaCRN", 4799.68], ["DCRNN", 5365.4], ["DGCRN", 5433.26], ["BigST", 6870.72]], "2": [["BigST", 4843.6], ["STPGNN", 5068.11], ["GraphWaveNet", 5233.56], ["MegaCRN", 5443.44], ["DGCRN", 6072.86], ["DCRNN", 6319.21]], "3": [["BigST", 5087.51], ["STPGNN", 5406.18], ["GraphWaveNet", 5511.15], ["MegaCRN", 5872.68], ["DGCRN", 6464.06], ["DCRNN", 6790.14]], "4": [["STPGNN", 5566.81], ["GraphWaveNet", 5675.96], ["MegaCRN", 6101.91], ["DGCRN", 6845.77], ["DCRNN", 7132.41], ["BigST", 7983.2]], "5": [["BigST", 4695.3], ["STPGNN", 5648.29], ["GraphWaveNet", 5829.27], ["MegaCRN", 6165.25], ["DCRNN", 7099.33], ["DGCRN", 7269.06]], "6": [["GraphWaveNet", 4929.74], ["STPGNN", 5093.95], ["BigST", 5281.0], ["MegaCRN", 5797.86], ["DGCRN", 5955.41], ["DCRNN", 7107.24]]}, "Corr": {"0": [["GraphWaveNet", 0.91], ["DGCRN", 0.91], ["STPGNN", 0.91], ["MegaCRN", 0.9], ["DCRNN", 0.85], ["BigST", 0.83]], "1": [["STPGNN", 0.74], ["GraphWaveNet", 0.73], ["MegaCRN", 0.73], ["BigST", 0.7], ["DGCRN", 0.68], ["DCRNN", 0.62]], "2": [["BigST", 0.72], ["STPGNN", 0.71], ["GraphWaveNet", 0.7], ["MegaCRN", 0.68], ["DGCRN", 0.61], ["DCRNN", 0.55]], "3": [["BigST", 0.71], ["GraphWaveNet", 0.69], ["STPGNN", 0.69], ["MegaCRN", 0.66], ["DGCRN", 0.57], ["DCRNN", 0.52]], "4": [["GraphWaveNet", 0.69], ["STPGNN", 0.68], ["MegaCRN", 0.64], ["DGCRN", 0.53], ["DCRNN", 0.5], ["BigST", 0.49]], "5": [["BigST", 0.72], ["GraphWaveNet", 0.68], ["STPGNN", 0.67], ["MegaCRN", 0.63], ["DGCRN", 0.5], ["DCRNN", 0.49]]}}, "P": {"MAE": {"0": [["MegaCRN", 0.66], ["DGCRN", 0.86], ["STPGNN", 0.86], ["DCRNN", 0.89], ["BigST", 0.9], ["GraphWaveNet", 1.45]], "1": [["BigST", 1.41], ["GraphWaveNet", 1.99], ["MegaCRN", 1.99], ["STPGNN", 2.01], ["DCRNN", 2.1], ["DGCRN", 6.69]], "2": [["BigST", 2.01], ["GraphWaveNet", 2.34], ["STPGNN", 2.46], ["MegaCRN", 2.62], ["DCRNN", 2.75], ["DGCRN", 6.68]], "3": [["BigST", 2.4], ["GraphWaveNet", 2.62], ["STPGNN", 2.73], ["MegaCRN", 3.31], ["DCRNN", 3.32], ["DGCRN", 7.47]], "4": [["BigST", 1.52], ["GraphWaveNet", 2.73], ["STPGNN", 2.8], ["DCRNN", 3.74], ["MegaCRN", 4.21], ["DGCRN", 8.29]], "5": [["GraphWaveNet", 2.83], ["STPGNN", 2.9], ["BigST", 3.3], ["DCRNN", 4.18], ["MegaCRN", 5.47], ["DGCRN", 9.14]], "6": [["BigST", 2.13], ["STPGNN", 2.44], ["GraphWaveNet", 2.57], ["DCRNN", 2.98], ["MegaCRN", 3.13], ["DGCRN", 6.76]]}, "Corr": {"0": [["BigST", 1.0], ["GraphWaveNet", 0.99], ["DCRNN", 0.99], ["DGCRN", 0.99], ["STPGNN", 0.99], ["MegaCRN", 0.99]], "1": [["GraphWaveNet", 0.99], ["DCRNN", 0.99], ["BigST", 0.99], ["STPGNN", 0.99], ["MegaCRN", 0.99], ["DGCRN", 0.98]], "2": [["BigST", 1.0], ["GraphWaveNet", 0.99], ["DCRNN", 0.99], ["STPGNN", 0.99], ["MegaCRN", 0.99], ["DGCRN", 0.97]], "3": [["BigST", 1.0], ["GraphWaveNet", 0.99], ["DCRNN", 0.99], ["STPGNN", 0.99], ["MegaCRN", 0.98], ["DGCRN", 0.95]], "4": [["BigST", 1.0], ["GraphWaveNet", 0.99], ["STPGNN", 0.99], ["DCRNN", 0.98], ["MegaCRN", 0.98], ["DGCRN", 0.94]], "5": [["BigST", 1.0], ["GraphWaveNet", 0.99], ["STPGNN", 0.99], ["DCRNN", 0.97], ["MegaCRN", 0.97], ["DGCRN", 0.92]]}}, "PM2.5": {"MAE": {"0": [["DGCRN", 1.89], ["DCRNN", 2.05], ["STPGNN", 3.44], ["BigST", 3.49], ["GraphWaveNet", 4.61], ["MegaCRN", 7.67]], "1": [["BigST", 3.12], ["STPGNN", 6.37], ["DCRNN", 6.41], ["GraphWaveNet", 6.98], ["MegaCRN", 9.09], ["DGCRN", 9.23]], "2": [["BigST", 3.75], ["STPGNN", 7.43], ["DCRNN", 7.77], ["GraphWaveNet", 8.28], ["MegaCRN", 9.51], ["DGCRN", 9.6]], "3": [["BigST", 2.97], ["STPGNN", 8.15], ["DCRNN", 8.57], ["GraphWaveNet", 8.59], ["DGCRN", 10.14], ["MegaCRN", 10.23]], "4": [["STPGNN", 8.45], ["GraphWaveNet", 8.47], ["DCRNN", 8.96], ["DGCRN", 10.47], ["MegaCRN", 10.47], ["BigST", 12.35]], "5": [["STPGNN", 8.35], ["BigST", 8.55], ["GraphWaveNet", 8.76], ["DCRNN", 8.79], ["DGCRN", 10.67], ["MegaCRN", 10.71]], "6": [["BigST", 6.46], ["GraphWaveNet", 7.35], ["STPGNN", 7.41], ["DCRNN", 7.63], ["DGCRN", 9.65], ["MegaCRN", 9.89]]}, "Corr": {"0": [["DGCRN", 0.87], ["DCRNN", 0.84], ["MegaCRN", 0.8], ["STPGNN", 0.75], ["GraphWaveNet", 0.68], ["BigST", 0.43]], "1": [["STPGNN", 0.41], ["DCRNN", 0.38], ["MegaCRN", 0.38], ["GraphWaveNet", 0.31], ["BigST", 0.25], ["DGCRN", 0.12]], "2": [["STPGNN", 0.33], ["MegaCRN", 0.31], ["BigST", 0.29], ["DCRNN", 0.28], ["GraphWaveNet", 0.24], ["DGCRN", 0.02]], "3": [["BigST", 0.36], ["STPGNN", 0.3], ["MegaCRN", 0.29], ["GraphWaveNet", 0.27], ["DCRNN", 0.24], ["DGCRN", 0.02]], "4": [["BigST", 0.6], ["STPGNN", 0.29], ["MegaCRN", 0.27], ["GraphWaveNet", 0.23], ["DCRNN", 0.19], ["DGCRN", 0.01]], "5": [["BigST", 0.28], ["STPGNN", 0.26], ["GraphWaveNet", 0.25], ["MegaCRN", 0.24], ["DCRNN", 0.13], ["DGCRN", 0.02]]}}, "AQI": {"MAE": {"0": [["DGCRN", 2.6], ["DCRNN", 3.18], ["STPGNN", 3.68], ["GraphWaveNet", 4.18], ["BigST", 5.05], ["MegaCRN", 9.46]], "1": [["BigST", 4.61], ["DCRNN", 7.94], ["STPGNN", 7.96], ["GraphWaveNet", 8.85], ["MegaCRN", 10.73], ["DGCRN", 11.15]], "2": [["BigST", 9.32], ["STPGNN", 9.82], ["DCRNN", 9.98], ["GraphWaveNet", 10.52], ["MegaCRN", 11.22], ["DGCRN", 11.58]], "3": [["BigST", 6.58], ["STPGNN", 10.97], ["GraphWaveNet", 11.24], ["DCRNN", 11.65], ["DGCRN", 12.2], ["MegaCRN", 12.2]], "4": [["STPGNN", 10.85], ["BigST", 11.19], ["GraphWaveNet", 11.67], ["DGCRN", 12.52], ["MegaCRN", 12.53], ["DCRNN", 12.61]], "5": [["BigST", 8.21], ["STPGNN", 10.7], ["GraphWaveNet", 11.9], ["DCRNN", 12.28], ["MegaCRN", 12.52], ["DGCRN", 12.92]], "6": [["BigST", 7.94], ["GraphWaveNet", 9.35], ["STPGNN", 9.53], ["DCRNN", 10.51], ["MegaCRN", 11.56], ["DGCRN", 11.72]]}, "Corr": {"0": [["DGCRN", 0.87], ["STPGNN", 0.83], ["DCRNN", 0.79], ["GraphWaveNet", 0.73], ["BigST", 0.16], ["MegaCRN", -0.62]], "1": [["STPGNN", 0.44], ["DCRNN", 0.38], ["GraphWaveNet", 0.33], ["BigST", 0.31], ["MegaCRN", 0.24], ["DGCRN", 0.06]], "2": [["STPGNN", 0.36], ["DCRNN", 0.27], ["GraphWaveNet", 0.2], ["MegaCRN", 0.03], ["DGCRN", -0.1], ["BigST", -0.15]], "3": [["STPGNN", 0.34], ["DCRNN", 0.23], ["GraphWaveNet", 0.17], ["MegaCRN", 0.02], ["DGCRN", -0.1], ["BigST", -0.25]], "4": [["STPGNN", 0.3], ["DCRNN", 0.19], ["GraphWaveNet", 0.17], ["MegaCRN", -0.01], ["BigST", -0.02], ["DGCRN", -0.1]], "5": [["STPGNN", 0.28], ["BigST", 0.25], ["DCRNN", 0.17], ["GraphWaveNet", 0.14], ["MegaCRN", -0.01], ["DGCRN", -0.1]]}}}, "Harbin": {"T": {"MAE": {"0": [["DGCRN", 0.59], ["GraphWaveNet", 1.23], ["STPGNN", 1.37], ["DCRNN", 1.75], ["BigST", 3.88], ["MegaCRN", 12.52]], "1": [["GraphWaveNet", 2.93], ["STPGNN", 3.02], ["DCRNN", 3.78], ["BigST", 5.5], ["DGCRN", 6.54], ["MegaCRN", 10.05]], "2": [["GraphWaveNet", 3.27], ["BigST", 3.29], ["STPGNN", 3.4], ["DCRNN", 4.25], ["MegaCRN", 8.32], ["DGCRN", 8.56]], "3": [["STPGNN", 3.57], ["GraphWaveNet", 3.63], ["DCRNN", 4.69], ["BigST", 5.68], ["MegaCRN", 8.38], ["DGCRN", 9.26]], "4": [["GraphWaveNet", 3.7], ["STPGNN", 3.79], ["DCRNN", 4.89], ["BigST", 8.08], ["MegaCRN", 8.13], ["DGCRN", 9.28]], "5": [["GraphWaveNet", 3.63], ["STPGNN", 3.69], ["DCRNN", 4.86], ["MegaCRN", 8.07], ["DGCRN", 9.23], ["BigST", 15.91]], "6": [["GraphWaveNet", 3.27], ["STPGNN", 3.36], ["DCRNN", 5.13], ["BigST", 5.99], ["DGCRN", 7.81], ["MegaCRN", 9.84]]}, "Corr": {"0": [["DGCRN", 0.91], ["STPGNN", 0.81], ["GraphWaveNet", 0.78], ["DCRNN", 0.72], ["MegaCRN", 0.56], ["BigST", -0.27]], "1": [["GraphWaveNet", 0.37], ["STPGNN", 0.36], ["DCRNN", 0.29], ["DGCRN", 0.21], ["MegaCRN", 0.01], ["BigST", -0.19]], "2": [["STPGNN", 0.31], ["GraphWaveNet", 0.28], ["DCRNN", 0.25], ["DGCRN", 0.22], ["BigST", 0.1], ["MegaCRN", 0.02]], "3": [["GraphWaveNet", 0.33], ["STPGNN", 0.32], ["BigST", 0.27], ["DCRNN", 0.23], ["DGCRN", 0.22], ["MegaCRN", 0.02]], "4": [["STPGNN", 0.32], ["GraphWaveNet", 0.28], ["BigST", 0.25], ["DGCRN", 0.22], ["DCRNN", 0.2], ["MegaCRN", -0.0]], "5": [["STPGNN", 0.32], ["GraphWaveNet", 0.28], ["DGCRN", 0.22], ["DCRNN", 0.18], ["BigST", 0.01], ["MegaCRN", -0.01]]}}, "VIS": {"MAE": {"0": [["DGCRN", 2434.79], ["STPGNN", 3089.77], ["GraphWaveNet", 3285.29], ["DCRNN", 3553.3], ["MegaCRN", 6483.53], ["BigST", 9949.51]], "1": [["STPGNN", 6236.85], ["GraphWaveNet", 6676.51], ["DCRNN", 6980.55], ["MegaCRN", 8379.95], ["DGCRN", 8593.8], ["BigST", 11364.97]], "2": [["STPGNN", 6850.02], ["GraphWaveNet", 7177.39], ["DCRNN", 7885.04], ["BigST", 8292.81], ["DGCRN", 8650.74], ["MegaCRN", 8867.01]], "3": [["STPGNN", 7143.92], ["GraphWaveNet", 7492.28], ["DCRNN", 8465.93], ["DGCRN", 8679.95], ["MegaCRN", 9198.31], ["BigST", 12374.55]], "4": [["STPGNN", 7291.57], ["GraphWaveNet", 7636.04], ["BigST", 8694.83], ["DGCRN", 8776.43], ["DCRNN", 8885.46], ["MegaCRN", 9368.77]], "5": [["BigST", 4242.65], ["STPGNN", 7419.91], ["GraphWaveNet", 7794.69], ["DGCRN", 8918.45], ["DCRNN", 8963.57], ["MegaCRN", 9754.55]], "6": [["GraphWaveNet", 6305.46], ["STPGNN", 6765.6], ["DCRNN", 8253.94], ["DGCRN", 8524.78], ["BigST", 8770.52], ["MegaCRN", 8975.73]]}, "Corr": {"0": [["DGCRN", 0.84], ["STPGNN", 0.82], ["GraphWaveNet", 0.8], ["DCRNN", 0.73], ["MegaCRN", 0.48], ["BigST", 0.35]], "1": [["STPGNN", 0.52], ["GraphWaveNet", 0.49], ["DCRNN", 0.37], ["MegaCRN", 0.32], ["DGCRN", 0.11], ["BigST", -0.4]], "2": [["STPGNN", 0.49], ["GraphWaveNet", 0.47], ["DCRNN", 0.31], ["MegaCRN", 0.27], ["DGCRN", 0.18], ["BigST", -0.62]], "3": [["STPGNN", 0.45], ["GraphWaveNet", 0.41], ["DCRNN", 0.27], ["MegaCRN", 0.25], ["DGCRN", 0.17], ["BigST", -0.01]], "4": [["STPGNN", 0.45], ["GraphWaveNet", 0.4], ["MegaCRN", 0.25], ["DCRNN", 0.23], ["BigST", 0.19], ["DGCRN", 0.17]], "5": [["STPGNN", 0.44], ["GraphWaveNet", 0.4], ["DCRNN", 0.25], ["MegaCRN", 0.22], ["DGCRN", 0.16], ["BigST", -0.07]]}}, "P": {"MAE": {"0": [["DGCRN", 0.27], ["STPGNN", 1.21], ["GraphWaveNet", 1.3], ["DCRNN", 1.91], ["BigST", 3.83], ["MegaCRN", 8.36]], "1": [["BigST", 2.25], ["STPGNN", 3.76], ["GraphWaveNet", 3.89], ["DCRNN", 4.44], ["MegaCRN", 9.52], ["DGCRN", 9.9]], "2": [["GraphWaveNet", 4.5], ["STPGNN", 4.72], ["DCRNN", 5.38], ["BigST", 6.96], ["DGCRN", 7.87], ["MegaCRN", 9.4]], "3": [["BigST", 2.91], ["GraphWaveNet", 5.16], ["STPGNN", 5.35], ["DCRNN", 5.82], ["DGCRN", 8.57], ["MegaCRN", 9.29]], "4": [["BigST", 3.93], ["STPGNN", 5.51], ["GraphWaveNet", 5.69], ["DCRNN", 6.16], ["MegaCRN", 9.12], ["DGCRN", 10.55]], "5": [["BigST", 4.13], ["STPGNN", 5.13], ["GraphWaveNet", 5.38], ["DCRNN", 5.95], ["DGCRN", 8.16], ["MegaCRN", 8.82]], "6": [["BigST", 3.84], ["STPGNN", 4.55], ["GraphWaveNet", 4.58], ["DCRNN", 5.23], ["DGCRN", 8.23], ["MegaCRN", 8.93]]}, "Corr": {"0": [["DGCRN", 1.0], ["GraphWaveNet", 0.99], ["STPGNN", 0.99], ["BigST", 0.93], ["DCRNN", 0.88], ["MegaCRN", 0.87]], "1": [["GraphWaveNet", 0.97], ["STPGNN", 0.97], ["DGCRN", 0.96], ["BigST", 0.95], ["DCRNN", 0.9], ["MegaCRN", 0.8]], "2": [["STPGNN", 0.97], ["GraphWaveNet", 0.96], ["BigST", 0.96], ["DCRNN", 0.88], ["DGCRN", 0.81], ["MegaCRN", 0.79]], "3": [["STPGNN", 0.96], ["GraphWaveNet", 0.95], ["BigST", 0.88], ["DCRNN", 0.85], ["MegaCRN", 0.79], ["DGCRN", 0.55]], "4": [["STPGNN", 0.96], ["GraphWaveNet", 0.95], ["BigST", 0.95], ["DCRNN", 0.82], ["MegaCRN", 0.78], ["DGCRN", 0.35]], "5": [["STPGNN", 0.96], ["GraphWaveNet", 0.95], ["BigST", 0.94], ["DCRNN", 0.78], ["MegaCRN", 0.78], ["DGCRN", 0.22]]}}, "PM2.5": {"MAE": {"0": [["DCRNN", 7.11], ["DGCRN", 8.0], ["STPGNN", 8.36], ["BigST", 8.69], ["GraphWaveNet", 14.48], ["MegaCRN", 40.91]], "1": [["BigST", 4.48], ["STPGNN", 18.72], ["DCRNN", 20.17], ["GraphWaveNet", 22.73], ["MegaCRN", 23.22], ["DGCRN", 23.45]], "2": [["BigST", 12.25], ["STPGNN", 21.42], ["DCRNN", 22.75], ["MegaCRN", 24.3], ["GraphWaveNet", 24.4], ["DGCRN", 25.04]], "3": [["BigST", 5.77], ["STPGNN", 23.18], ["DCRNN", 25.01], ["MegaCRN", 25.78], ["DGCRN", 26.16], ["GraphWaveNet", 27.89]], "4": [["BigST", 7.19], ["STPGNN", 23.33], ["DCRNN", 25.63], ["MegaCRN", 26.19], ["DGCRN", 26.88], ["GraphWaveNet", 27.88]], "5": [["BigST", 2.87], ["STPGNN", 23.29], ["MegaCRN", 25.75], ["DCRNN", 25.88], ["DGCRN", 26.66], ["GraphWaveNet", 27.71]], "6": [["BigST", 13.39], ["GraphWaveNet", 21.18], ["STPGNN", 21.64], ["DCRNN", 23.22], ["MegaCRN", 24.89], ["DGCRN", 25.03]]}, "Corr": {"0": [["DGCRN", 0.87], ["DCRNN", 0.79], ["STPGNN", 0.79], ["GraphWaveNet", 0.73], ["MegaCRN", 0.22], ["BigST", 0.07]], "1": [["BigST", 0.59], ["STPGNN", 0.34], ["GraphWaveNet", 0.3], ["DCRNN", 0.22], ["MegaCRN", 0.22], ["DGCRN", -0.01]], "2": [["BigST", 0.36], ["STPGNN", 0.35], ["GraphWaveNet", 0.31], ["MegaCRN", 0.17], ["DCRNN", 0.1], ["DGCRN", -0.03]], "3": [["STPGNN", 0.35], ["GraphWaveNet", 0.33], ["MegaCRN", 0.17], ["DCRNN", 0.06], ["DGCRN", -0.04], ["BigST", -0.28]], "4": [["STPGNN", 0.31], ["GraphWaveNet", 0.25], ["BigST", 0.15], ["MegaCRN", 0.15], ["DCRNN", 0.06], ["DGCRN", -0.04]], "5": [["BigST", 0.48], ["STPGNN", 0.32], ["GraphWaveNet", 0.26], ["MegaCRN", 0.13], ["DCRNN", 0.03], ["DGCRN", -0.05]]}}, "AQI": {"MAE": {"0": [["DGCRN", 6.12], ["STPGNN", 7.3], ["DCRNN", 11.23], ["GraphWaveNet", 17.96], ["BigST", 24.05], ["MegaCRN", 25.6]], "1": [["BigST", 9.55], ["STPGNN", 23.42], ["DCRNN", 25.66], ["GraphWaveNet", 28.0], ["MegaCRN", 28.3], ["DGCRN", 29.73]], "2": [["BigST", 15.45], ["STPGNN", 26.86], ["DGCRN", 29.27], ["MegaCRN", 29.61], ["GraphWaveNet", 30.19], ["DCRNN", 31.32]], "3": [["BigST", 15.78], ["STPGNN", 28.61], ["DGCRN", 30.32], ["MegaCRN", 30.91], ["GraphWaveNet", 32.75], ["DCRNN", 35.83]], "4": [["BigST", 22.2], ["STPGNN", 28.54], ["DGCRN", 31.13], ["MegaCRN", 31.44], ["GraphWaveNet", 33.33], ["DCRNN", 36.01]], "5": [["BigST", 16.78], ["STPGNN", 28.44], ["DGCRN", 30.65], ["MegaCRN", 31.09], ["GraphWaveNet", 33.03], ["DCRNN", 35.44]], "6": [["BigST", 21.79], ["GraphWaveNet", 26.31], ["STPGNN", 26.58], ["DGCRN", 29.43], ["MegaCRN", 29.96], ["DCRNN", 31.95]]}, "Corr": {"0": [["DGCRN", 0.89], ["STPGNN", 0.84], ["GraphWaveNet", 0.79], ["DCRNN", 0.7], ["BigST", 0.4], ["MegaCRN", 0.38]], "1": [["STPGNN", 0.33], ["GraphWaveNet", 0.29], ["MegaCRN", 0.26], ["DCRNN", 0.15], ["DGCRN", 0.04], ["BigST", -0.33]], "2": [["STPGNN", 0.33], ["GraphWaveNet", 0.26], ["MegaCRN", 0.25], ["DCRNN", 0.09], ["DGCRN", 0.02], ["BigST", -0.12]], "3": [["STPGNN", 0.31], ["GraphWaveNet", 0.3], ["MegaCRN", 0.24], ["BigST", 0.12], ["DCRNN", 0.09], ["DGCRN", -0.01]], "4": [["BigST", 0.3], ["STPGNN", 0.26], ["GraphWaveNet", 0.25], ["MegaCRN", 0.24], ["DCRNN", 0.09], ["DGCRN", -0.0]], "5": [["STPGNN", 0.27], ["GraphWaveNet", 0.26], ["BigST", 0.25], ["MegaCRN", 0.23], ["DCRNN", 0.11], ["DGCRN", 0.02]]}}}, "Shanghai": {"T": {"MAE": {"0": [["DGCRN", 0.44], ["STPGNN", 1.09], ["BigST", 1.77], ["GraphWaveNet", 1.95], ["MegaCRN", 5.51], ["DCRNN", 6.31]], "1": [["STPGNN", 2.3], ["GraphWaveNet", 2.52], ["DGCRN", 2.69], ["BigST", 3.0], ["DCRNN", 5.73], ["MegaCRN", 5.74]], "2": [["GraphWaveNet", 2.88], ["STPGNN", 2.96], ["DGCRN", 3.53], ["BigST", 4.01], ["DCRNN", 5.2], ["MegaCRN", 6.06]], "3": [["GraphWaveNet", 3.16], ["STPGNN", 3.3], ["DGCRN", 4.58], ["BigST", 4.71], ["DCRNN", 5.27], ["MegaCRN", 6.3]], "4": [["GraphWaveNet", 3.42], ["STPGNN", 3.58], ["BigST", 5.23], ["DCRNN", 5.24], ["DGCRN", 5.3], ["MegaCRN", 6.53]], "5": [["GraphWaveNet", 3.56], ["STPGNN", 3.74], ["DCRNN", 5.2], ["DGCRN", 5.54], ["BigST", 5.65], ["MegaCRN", 6.72]], "6": [["GraphWaveNet", 2.96], ["STPGNN", 3.02], ["DGCRN", 3.9], ["BigST", 5.22], ["DCRNN", 5.44], ["MegaCRN", 6.64]]}, "Corr": {"0": [["DGCRN", 0.84], ["STPGNN", 0.74], ["GraphWaveNet", 0.65], ["BigST", 0.64], ["MegaCRN", 0.62], ["DCRNN", 0.16]], "1": [["DGCRN", 0.49], ["GraphWaveNet", 0.46], ["BigST", 0.45], ["STPGNN", 0.43], ["MegaCRN", 0.43], ["DCRNN", -0.1]], "2": [["BigST", 0.44], ["GraphWaveNet", 0.4], ["DGCRN", 0.4], ["MegaCRN", 0.36], ["STPGNN", 0.35], ["DCRNN", 0.02]], "3": [["GraphWaveNet", 0.4], ["BigST", 0.4], ["DGCRN", 0.34], ["MegaCRN", 0.34], ["STPGNN", 0.28], ["DCRNN", 0.01]], "4": [["BigST", 0.4], ["GraphWaveNet", 0.37], ["MegaCRN", 0.32], ["DGCRN", 0.31], ["STPGNN", 0.25], ["DCRNN", 0.04]], "5": [["GraphWaveNet", 0.43], ["BigST", 0.41], ["MegaCRN", 0.33], ["DGCRN", 0.32], ["STPGNN", 0.27], ["DCRNN", 0.01]]}}, "VIS": {"MAE": {"0": [["DGCRN", 2062.01], ["DCRNN", 2089.6], ["MegaCRN", 2341.23], ["BigST", 2524.84], ["STPGNN", 2590.91], ["GraphWaveNet", 3593.91]], "1": [["BigST", 5974.94], ["STPGNN", 6080.46], ["GraphWaveNet", 6165.07], ["DCRNN", 6390.02], ["MegaCRN", 6664.35], ["DGCRN", 7521.25]], "2": [["BigST", 6566.66], ["GraphWaveNet", 6815.92], ["STPGNN", 6962.85], ["DGCRN", 7408.31], ["DCRNN", 7699.32], ["MegaCRN", 8211.36]], "3": [["GraphWaveNet", 6668.18], ["BigST", 6725.88], ["STPGNN", 6950.32], ["DGCRN", 7436.03], ["DCRNN", 7616.11], ["MegaCRN", 8452.16]], "4": [["GraphWaveNet", 6761.72], ["BigST", 6916.79], ["STPGNN", 7256.8], ["DGCRN", 7689.77], ["DCRNN", 7853.54], ["MegaCRN", 8484.44]], "5": [["GraphWaveNet", 6900.6], ["BigST", 7096.81], ["STPGNN", 7270.27], ["DGCRN", 7825.05], ["DCRNN", 8170.48], ["MegaCRN", 8386.15]], "6": [["GraphWaveNet", 6458.97], ["STPGNN", 6713.29], ["BigST", 6775.73], ["DCRNN", 7199.63], ["DGCRN", 7339.86], ["MegaCRN", 7735.14]]}, "Corr": {"0": [["DGCRN", 0.72], ["DCRNN", 0.71], ["MegaCRN", 0.71], ["STPGNN", 0.69], ["GraphWaveNet", 0.66], ["BigST", 0.66]], "1": [["BigST", 0.42], ["DCRNN", 0.41], ["GraphWaveNet", 0.4], ["STPGNN", 0.37], ["MegaCRN", 0.37], ["DGCRN", 0.2]], "2": [["DCRNN", 0.38], ["BigST", 0.37], ["GraphWaveNet", 0.33], ["STPGNN", 0.33], ["MegaCRN", 0.29], ["DGCRN", 0.22]], "3": [["BigST", 0.36], ["DCRNN", 0.35], ["GraphWaveNet", 0.31], ["STPGNN", 0.3], ["MegaCRN", 0.25], ["DGCRN", 0.22]], "4": [["BigST", 0.34], ["DCRNN", 0.32], ["STPGNN", 0.32], ["GraphWaveNet", 0.29], ["MegaCRN", 0.26], ["DGCRN", 0.22]], "5": [["BigST", 0.34], ["STPGNN", 0.34], ["DCRNN", 0.33], ["GraphWaveNet", 0.32], ["MegaCRN", 0.27], ["DGCRN", 0.24]]}}, "P": {"MAE": {"0": [["DGCRN", 0.4], ["DCRNN", 0.61], ["GraphWaveNet", 1.3], ["BigST", 1.48], ["STPGNN", 1.68], ["MegaCRN", 7.37]], "1": [["DCRNN", 2.94], ["GraphWaveNet", 2.98], ["STPGNN", 2.99], ["BigST", 3.6], ["DGCRN", 4.16], ["MegaCRN", 5.6]], "2": [["DCRNN", 4.07], ["GraphWaveNet", 4.14], ["STPGNN", 4.23], ["BigST", 4.87], ["DGCRN", 4.96], ["MegaCRN", 5.88]], "3": [["GraphWaveNet", 4.52], ["STPGNN", 4.63], ["DCRNN", 4.84], ["BigST", 5.22], ["DGCRN", 5.41], ["MegaCRN", 6.05]], "4": [["GraphWaveNet", 4.58], ["STPGNN", 5.11], ["BigST", 5.54], ["DCRNN", 5.63], ["DGCRN", 5.67], ["MegaCRN", 6.24]], "5": [["GraphWaveNet", 4.69], ["STPGNN", 5.03], ["BigST", 5.65], ["DGCRN", 5.93], ["DCRNN", 6.22], ["MegaCRN", 6.27]], "6": [["GraphWaveNet", 3.83], ["STPGNN", 4.06], ["DCRNN", 4.3], ["DGCRN", 4.9], ["BigST", 5.21], ["MegaCRN", 6.04]]}, "Corr": {"0": [["STPGNN", 0.79], ["DGCRN", 0.78], ["GraphWaveNet", 0.74], ["BigST", 0.61], ["DCRNN", 0.57], ["MegaCRN", 0.41]], "1": [["GraphWaveNet", 0.56], ["BigST", 0.46], ["MegaCRN", 0.45], ["STPGNN", 0.43], ["DCRNN", 0.22], ["DGCRN", -0.01]], "2": [["BigST", 0.51], ["MegaCRN", 0.45], ["GraphWaveNet", 0.4], ["STPGNN", 0.25], ["DCRNN", 0.22], ["DGCRN", -0.08]], "3": [["BigST", 0.44], ["MegaCRN", 0.41], ["GraphWaveNet", 0.33], ["DCRNN", 0.22], ["STPGNN", 0.18], ["DGCRN", -0.04]], "4": [["MegaCRN", 0.39], ["BigST", 0.36], ["GraphWaveNet", 0.26], ["DCRNN", 0.22], ["STPGNN", 0.11], ["DGCRN", -0.01]], "5": [["MegaCRN", 0.4], ["BigST", 0.39], ["DCRNN", 0.2], ["GraphWaveNet", 0.19], ["STPGNN", 0.13], ["DGCRN", 0.01]]}}, "PM2.5": {"MAE": {"0": [["MegaCRN", 2.59], ["DGCRN", 2.69], ["DCRNN", 3.19], ["STPGNN", 3.84], ["GraphWaveNet", 4.8], ["BigST", 9.78]], "1": [["STPGNN", 12.46], ["GraphWaveNet", 12.5], ["MegaCRN", 12.72], ["DCRNN", 13.5], ["BigST", 13.69], ["DGCRN", 13.94]], "2": [["STPGNN", 13.85], ["GraphWaveNet", 14.25], ["BigST", 14.28], ["MegaCRN", 14.55], ["DCRNN", 15.72], ["DGCRN", 16.08]], "3": [["BigST", 13.73], ["STPGNN", 13.99], ["GraphWaveNet", 14.21], ["MegaCRN", 14.77], ["DCRNN", 16.06], ["DGCRN", 17.26]], "4": [["GraphWaveNet", 13.43], ["BigST", 14.03], ["STPGNN", 14.08], ["MegaCRN", 14.57], ["DCRNN", 16.4], ["DGCRN", 19.75]], "5": [["GraphWaveNet", 12.76], ["BigST", 14.47], ["STPGNN", 14.65], ["MegaCRN", 14.95], ["DCRNN", 16.36], ["DGCRN", 20.91]], "6": [["GraphWaveNet", 13.02], ["STPGNN", 13.21], ["MegaCRN", 13.68], ["BigST", 14.3], ["DCRNN", 14.91], ["DGCRN", 16.24]]}, "Corr": {"0": [["DGCRN", 0.77], ["MegaCRN", 0.77], ["STPGNN", 0.7], ["GraphWaveNet", 0.69], ["DCRNN", 0.67], ["BigST", 0.35]], "1": [["MegaCRN", 0.28], ["GraphWaveNet", 0.24], ["DCRNN", 0.23], ["DGCRN", 0.23], ["STPGNN", 0.23], ["BigST", 0.2]], "2": [["DCRNN", 0.21], ["MegaCRN", 0.21], ["BigST", 0.14], ["DGCRN", 0.14], ["GraphWaveNet", 0.13], ["STPGNN", 0.13]], "3": [["DCRNN", 0.2], ["MegaCRN", 0.2], ["BigST", 0.15], ["GraphWaveNet", 0.12], ["STPGNN", 0.12], ["DGCRN", 0.03]], "4": [["DCRNN", 0.2], ["BigST", 0.19], ["MegaCRN", 0.18], ["GraphWaveNet", 0.14], ["STPGNN", 0.14], ["DGCRN", 0.03]], "5": [["DCRNN", 0.19], ["MegaCRN", 0.18], ["GraphWaveNet", 0.14], ["STPGNN", 0.14], ["BigST", 0.12], ["DGCRN", 0.01]]}}, "AQI": {"MAE": {"0": [["DGCRN", 3.67], ["STPGNN", 5.68], ["GraphWaveNet", 11.5], ["BigST", 12.49], ["DCRNN", 18.62], ["MegaCRN", 19.54]], "1": [["STPGNN", 16.49], ["GraphWaveNet", 17.77], ["BigST", 18.05], ["DGCRN", 19.55], ["DCRNN", 21.13], ["MegaCRN", 27.3]], "2": [["GraphWaveNet", 17.83], ["STPGNN", 17.96], ["BigST", 18.45], ["DCRNN", 20.11], ["DGCRN", 21.01], ["MegaCRN", 26.58]], "3": [["STPGNN", 17.4], ["BigST", 18.05], ["GraphWaveNet", 18.37], ["DGCRN", 20.25], ["DCRNN", 21.16], ["MegaCRN", 26.02]], "4": [["STPGNN", 17.61], ["BigST", 18.4], ["GraphWaveNet", 18.65], ["DGCRN", 19.79], ["DCRNN", 20.18], ["MegaCRN", 24.73]], "5": [["STPGNN", 17.88], ["GraphWaveNet", 18.77], ["BigST", 18.86], ["DGCRN", 19.35], ["DCRNN", 20.76], ["MegaCRN", 24.53]], "6": [["STPGNN", 17.0], ["GraphWaveNet", 17.86], ["BigST", 18.53], ["DGCRN", 19.6], ["DCRNN", 20.44], ["MegaCRN", 26.24]]}, "Corr": {"0": [["DGCRN", 0.79], ["STPGNN", 0.7], ["GraphWaveNet", 0.67], ["BigST", 0.35], ["DCRNN", 0.31], ["MegaCRN", -0.03]], "1": [["STPGNN", 0.26], ["GraphWaveNet", 0.23], ["BigST", 0.19], ["DCRNN", 0.01], ["DGCRN", -0.1], ["MegaCRN", -0.13]], "2": [["BigST", 0.21], ["STPGNN", 0.18], ["GraphWaveNet", 0.16], ["DCRNN", 0.16], ["MegaCRN", -0.08], ["DGCRN", -0.15]], "3": [["STPGNN", 0.19], ["GraphWaveNet", 0.17], ["BigST", 0.17], ["DCRNN", 0.15], ["MegaCRN", -0.06], ["DGCRN", -0.07]], "4": [["BigST", 0.21], ["STPGNN", 0.2], ["GraphWaveNet", 0.13], ["DCRNN", 0.08], ["DGCRN", -0.03], ["MegaCRN", -0.06]], "5": [["STPGNN", 0.21], ["BigST", 0.2], ["GraphWaveNet", 0.14], ["DGCRN", -0.05], ["DCRNN", -0.06], ["MegaCRN", -0.09]]}}}};
+
+        function formatValue(value, model, rankingList) {
+            if (!rankingList || rankingList.length === 0) return value;
+
+            for (let i = 0; i < rankingList.length; i++) {
+                if (rankingList[i][0] === model) {
+                    if (i === 0) return '<span class="best-val">' + value + '</span>';
+                    if (i === 1) return '<span class="second-val">' + value + '</span>';
+                    break;
+                }
+            }
+            return value;
+        }
+
+        function renderCells() {
+            document.querySelectorAll('td[data-raw]').forEach(cell => {
+                const raw = cell.getAttribute('data-raw');
+                const model = cell.getAttribute('data-model');
+                const district = cell.getAttribute('data-district');
+                const metric = cell.getAttribute('data-metric');
+                const isMAE = cell.classList.contains('mae-col');
+
+                if (!raw) {
+                    cell.innerHTML = '<span class="na">-</span>';
+                    return;
+                }
+
+                const districtRankings = rankings[district];
+                if (!districtRankings || !districtRankings[metric]) {
+                    cell.innerHTML = raw;
+                    return;
+                }
+
+                const metricRankings = districtRankings[metric];
+                const typeRankings = isMAE ? metricRankings['MAE'] : metricRankings['Corr'];
+
+                if (isMAE) {
+                    const parts = raw.split(' ');
+                    if (parts.length > 0) {
+                        const horizons = parts[0].split('/');
+                        const formatted = horizons.map((val, idx) => {
+                            const ranking = typeRankings[idx] || [];
+                            return formatValue(val, model, ranking);
+                        }).join('/');
+
+                        if (parts.length > 1) {
+                            const overallRanking = typeRankings[6] || [];
+                            const overallFormatted = formatValue(parts[1], model, overallRanking);
+                            cell.innerHTML = formatted + ' ' + overallFormatted;
+                        } else {
+                            cell.innerHTML = formatted;
+                        }
+                    } else {
+                        cell.innerHTML = raw;
+                    }
+                } else {
+                    const horizons = raw.split('/');
+                    const formatted = horizons.map((val, idx) => {
+                        const ranking = typeRankings[idx] || [];
+                        return formatValue(val, model, ranking);
+                    }).join('/');
+                    cell.innerHTML = formatted;
+                }
+            });
+        }
+
+        function applyFilters() {
+
+            const selectedDistricts = Array.from(document.querySelectorAll('.filter-group:nth-child(1) input:checked'))
+                .map(cb => cb.value);
+
+            const selectedMetrics = Array.from(document.querySelectorAll('.filter-group:nth-child(2) input:checked'))
+                .map(cb => cb.value);
+
+            document.querySelectorAll('.model-cell').forEach(cell => {
+                cell.style.display = 'none';
+                cell.rowSpan = 1;
+            });
+
+            const models = [
+        'GraphWaveNet',
+        'DCRNN',
+        'BigST',
+        'DGCRN',
+        'STPGNN',
+        'MegaCRN'
+    ];
+
+            models.forEach(model => {
+                const modelRows = document.querySelectorAll(`tr[data-model="${model}"]`);
+                const visibleRows = [];
+
+                modelRows.forEach(row => {
+                    const district = row.getAttribute('data-district');
+                    if (selectedDistricts.includes(district)) {
+                        row.classList.remove('hidden');
+                        visibleRows.push(row);
+                    } else {
+                        row.classList.add('hidden');
+                    }
+                });
+
+                if (visibleRows.length > 0) {
+                    const modelCell = visibleRows[0].querySelector('.model-cell');
+                    if (modelCell) {
+                        modelCell.style.display = '';
+                        modelCell.rowSpan = visibleRows.length;
+                    }
+                }
+            });
+            
+            document.querySelectorAll('thead th[data-metric], td[data-metric]').forEach(cell => {
+                const metric = cell.getAttribute('data-metric');
+                cell.classList.toggle('hidden', !selectedMetrics.includes(metric));
+            });
+        }
+
+        function selectAll() {
+            document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+            });
+            applyFilters();
+        }
+
+        function clearAll() {
+            document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            applyFilters();
+        }
+
+        renderCells();
+
+        const models = [
+        'GraphWaveNet',
+        'DCRNN',
+        'BigST',
+        'DGCRN',
+        'STPGNN',
+        'MegaCRN'
+    ];
+
+        models.forEach(model => {
+            const modelRows = document.querySelectorAll(`tr[data-model="${model}"]`);
+            if (modelRows.length > 0) {
+                const firstModelCell = modelRows[0].querySelector('.model-cell');
+                if (firstModelCell) {
+                    firstModelCell.rowSpan = modelRows.length;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
