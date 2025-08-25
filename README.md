@@ -2,6 +2,8 @@
 
 This is the official repository for the paper "WeatherAirSN: A Multi-Source Sparse Spatiotemporal Dataset Integrating Weather Observations, Air Quality Monitoring, and NWP for Meteorological and Environmental Applications".
 
+Dataset consistency (extreme events) research and visualization, benchmark test For details, please visit: https://aiweather126.github.io/WeatherAirSN/pages
+
 To download the dataset & code, please visit: https://huggingface.co/datasets/AIWeather126/WeatherAirSN
 
 *WeatherAirSN* is a comprehensive multi-source atmospheric dataset integrating ground observations, air quality monitoring, and ECMWF model data. 
