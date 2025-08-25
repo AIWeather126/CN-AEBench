@@ -15,9 +15,9 @@ We will make the dataset and code available for download once the paper is compl
 
 
 ---
-tags:
-- climate
+Domain:
+- weather & climate
 - Air quality and environment
 - NWP
-- assimilation
+- Assimilation
 ---
