@@ -72,11 +72,11 @@ To download the dataset & code, please visit: https://huggingface.co/datasets/AI
 | 32 | O3 | μg/m³ | Hourly mean O3 concentration |
 | 33 | CO | mg/m³ | Hourly mean CO concentration |
 
-## 2. 实验设置和信息
+## 2. Experiment Settings and Information
 The experiment was conducted on WeatherAirSN-L3. 
 To standardize the conditions, we set the time interval for the first version of L3 to 2023.09.01–2025.07.31. You may also choose to run your experiments on this version.
 
-### 2.1 研究区域
+### 2.1 Research Area
 We selected four representative regions across China for comprehensive evaluation:
 
 🏔️ Lanzhou Urban Agglomeration
