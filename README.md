@@ -131,8 +131,12 @@ and 188GB RAM. The system runs Ubuntu Linux with CUDA 11.7 and PyTorch 1.13.
 Experiment results: https://aiweather126.github.io/WeatherAirSN/pages
 
 ## 3. Data Availability
-We will make the dataset and code available for download once the paper is completed(L3 has been made public). Please wait for further updates.
+*WeatherAirSN* L3 data is specifically designed for building end-to-end intelligent forecasting models and is currently at version 1.0.0-SNAPSHOT.
+To ensure benchmark stability and comparability of research results, we release new versions only when significant improvements are made to accommodate new weather and environmental changes, with clear version numbering.
 
+L1 and L2 data for timeliness tasks are automatically uploaded to this repository daily around 12:30.
+
+We will make the dataset and code available for download once the paper is completed (the data has been released). Please wait for further updates.
 
 ---
 Domain:
