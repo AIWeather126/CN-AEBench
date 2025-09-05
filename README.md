@@ -140,7 +140,8 @@ We will make the dataset and code available for download once the paper is compl
 
 ---
 Domain:
-- weather & climate
-- Air quality and environment
-- NWP
-- Assimilation
+  - Weather Forecasting
+  - Climate Analysis
+  - Air Quality and Environment Forecasting
+  - NWP
+  - Assimilation
