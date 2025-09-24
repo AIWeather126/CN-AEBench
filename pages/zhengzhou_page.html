@@ -672,7 +672,15 @@
                 hovermode: 'x unified'
             };
 
-            Plotly.newPlot('chart1', traces, layout, {responsive: true});
+            Plotly.newPlot('chart1', traces, layout,{
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         // Chart 2: Fog-Haze transition
@@ -821,7 +829,15 @@
                 ]
             };
             
-            Plotly.newPlot('chart2', traces, layout, {responsive: true});
+            Plotly.newPlot('chart2', traces, layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         // Chart 3: 3D Phase Space
@@ -861,7 +877,15 @@
                 margin: { l: 0, r: 0, t: 0, b: 0 }
             };
             
-            Plotly.newPlot('chart3d', [trace1], layout, {responsive: true});
+            Plotly.newPlot('chart3d', [trace1], layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         // Chart 4: Wind Rose
@@ -910,7 +934,15 @@
                 showlegend: false
             };
             
-            Plotly.newPlot('chartWindRose', [trace], layout, {responsive: true});
+            Plotly.newPlot('chartWindRose', [trace], layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         // Chart 5: Ratio Plot
@@ -985,7 +1017,15 @@
                 ]
             };
             
-            Plotly.newPlot('chartRatio', traces, layout, {responsive: true});
+            Plotly.newPlot('chartRatio', traces, layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         // Chart 6: Mechanism Diagram
@@ -1066,7 +1106,15 @@
                 ]
             };
             
-            Plotly.newPlot('chartMechanism', traces, layout, {responsive: true});
+            Plotly.newPlot('chartMechanism', traces, layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         // Charts 7-14: Additional charts
@@ -1103,7 +1151,15 @@
                 margin: { l: 100, r: 80, t: 30, b: 60 }  // Increase left margin
             };
             
-            Plotly.newPlot('chart7', [trace], layout, {responsive: true});
+            Plotly.newPlot('chart7', [trace], layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         function createChart8() {
@@ -1136,7 +1192,15 @@
                 height: 550
             };
             
-            Plotly.newPlot('chart8', traces, layout, {responsive: true});
+            Plotly.newPlot('chart8', traces, layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         function createChart9() {
@@ -1182,7 +1246,15 @@
                 height: 500
             };
             
-            Plotly.newPlot('chart9', traces, layout, {responsive: true});
+            Plotly.newPlot('chart9', traces, layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         function createChart10() {
@@ -1250,7 +1322,15 @@
                 height: 500
             };
             
-            Plotly.newPlot('chart10', traces, layout, {responsive: true});
+            Plotly.newPlot('chart10', traces, layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         function createChart11() {
@@ -1332,7 +1412,15 @@
                 }
             };
             
-            Plotly.newPlot('chart11', [trace1, trace2, trace3, trace4], layout, {responsive: true});
+            Plotly.newPlot('chart11', [trace1, trace2, trace3, trace4], layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         function createChart12() {
@@ -1395,7 +1483,15 @@
                 annotations: annotations
             };
             
-            Plotly.newPlot('chart12', [trace], layout, {responsive: true});
+            Plotly.newPlot('chart12', [trace], layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         function createChart13() {
@@ -1448,7 +1544,15 @@
                 height: 450
             };
             
-            Plotly.newPlot('chart13', [trace1, trace3, trace2], layout, {responsive: true});
+            Plotly.newPlot('chart13', [trace1, trace3, trace2], layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
         
         function createChart14() {
@@ -1488,7 +1592,15 @@
                 ]
             };
             
-            Plotly.newPlot('chart14', traces, layout, {responsive: true});
+            Plotly.newPlot('chart14', traces, layout, {
+    responsive: true,
+    toImageButtonOptions: {
+        format: 'svg',
+        filename: 'chart_X',
+        
+        scale: 3       // 提高缩放比例（3倍分辨率）
+    }
+});
         }
 
         // Chart 15: Wind Field Image Display
@@ -1504,7 +1616,7 @@
         function updateImage(frameIndex) {
             currentFrame = parseInt(frameIndex);
             const paddedIndex = String(currentFrame).padStart(4, '0');
-            const imagePath = `./郑州/wind_field_maps/wind_field_${paddedIndex}.png`;
+            const imagePath = `./郑州/wind_field_maps/wind_field_${paddedIndex}.svg`;
 
             document.getElementById('windFieldImage').src = imagePath;
             document.getElementById('timeSlider').value = currentFrame;
@@ -1606,23 +1718,23 @@
                         
                         const processedRow = {
                             datetime: datetime,
-                            station: row.staCode ? String(row.staCode) : '57083',
-                            pm25: row['PM2.5'] || 0,
-                            pm10: row.PM10 || 0,
-                            rh: row.rh || 50,
-                            temp: row.t || 10,
-                            ws: row.ws_2min || 2,
-                            wd: row.wd_2min || 180,
-                            visibility: row.vis || 5000,
-                            vis: row.vis || 5000,
-                            ec_vis: row.ec_vis || row.vis || 5000,
-                            ec_t2m: row.ec_t2m || row.t || 10,
-                            dewpoint: row.dt || row.ec_d2m || 5,
-                            pressure: row.p || row.sp || 1013,
-                            so2: row.SO2 || 10,
-                            no2: row.NO2 || 20,
-                            co: row.CO || 0.5,
-                            o3: row.O3 || 30
+                            station: row.station_id ? String(row.station_id) : '57083',
+                            pm25: row['PM2.5'],
+                            pm10: row.PM10,
+                            rh: row.rh,
+                            temp: row.t,
+                            ws: row.ws_2min,
+                            wd: row.wd_2min,
+                            visibility: row.vis,
+                            vis: row.vis,
+                            ec_vis: row.ec_vi,
+                            ec_t2m: row.ec_t2m,
+                            dewpoint: row.dt,
+                            pressure: row.p,
+                            so2: row.SO2,
+                            no2: row.NO2,
+                            co: row.CO,
+                            o3: row.O3
                         };
                         
                         // Add station name

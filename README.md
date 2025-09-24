@@ -1,18 +1,18 @@
-![WeatherAirSN Dataset](./static/title.png)
+![CN-AEBench Dataset](./static/title.png)
 
-This is the official repository for the paper "WeatherAirSN: A Multi-Source Sparse Spatiotemporal Dataset Integrating Weather Observations, Air Quality Monitoring, and NWP for Meteorological and Environmental Applications".
-
----
-
-Dataset validity (extreme events) research and visualization, benchmark test for details, please visit: https://aiweather126.github.io/WeatherAirSN/pages
-
-To download the dataset & code, please visit: https://huggingface.co/datasets/AIWeather126/WeatherAirSN
+This is the official repository for the paper "CN-AEBench: Hourly Atmospheric Environmental Dataset for China (2023–Present) by Fusing Station Monitoring Data and ECMWF Forecast Data".
 
 ---
 
-*WeatherAirSN* is a comprehensive multi-source atmospheric & environmental dataset integrating ground observations, air quality monitoring, and ECMWF NWP data. 
+Dataset validity (extreme events) research and visualization, benchmark test for details, please visit: https://aiweather126.github.io/CN-AEBench/pages
 
-![WeatherAirSN Station Distribution](./static/distribution.png)
+To download the dataset & code, please visit: https://huggingface.co/datasets/AIWeather126/CN-AEBench
+
+---
+
+*CN-AEBench* is a comprehensive multi-source atmospheric & environmental dataset integrating ground observations, air quality monitoring, and ECMWF NWP data. 
+
+![CN-AEBench Station Distribution](./static/distribution.png)
 
 📊 Data Coverage: 2023-2025-Future
 
@@ -73,7 +73,7 @@ To download the dataset & code, please visit: https://huggingface.co/datasets/AI
 | 33 | CO | mg/m³ | Hourly mean CO concentration |
 
 ## 2. Experiment Settings and Information
-The experiment was conducted on WeatherAirSN-L3. 
+The experiment was conducted on CN-AEBench-L3. 
 To standardize the conditions, we set the time interval for the first version of L3 to 2023.09.01–2025.07.31. You may also choose to run your experiments on this version.
 
 ### 2.1 Research Area
@@ -128,10 +128,10 @@ held-out test set to ensure unbiased performance assessment.
 All experiments were conducted on a single server equipped with 4× NVIDIA A100 GPUs, an Intel Xeon Ice Lake processor (32 cores, 64 threads at 2.6GHz), 
 and 188GB RAM. The system runs Ubuntu Linux with CUDA 11.7 and PyTorch 1.13. 
 
-Experiment results: https://aiweather126.github.io/WeatherAirSN/pages
+Experiment results: https://aiweather126.github.io/CN-AEBench/pages
 
 ## 3. Data Availability
-*WeatherAirSN* L3 data is specifically designed for building end-to-end intelligent forecasting models and is currently at version 1.0.0-SNAPSHOT.
+*CN-AEBench* L3 data is specifically designed for building end-to-end intelligent forecasting models and is currently at version 1.0.0-SNAPSHOT.
 To ensure benchmark stability and comparability of research results, we release new versions only when significant improvements are made to accommodate new weather and environmental changes, with clear version numbering.
 
 L1 and L2 data for timeliness tasks are automatically uploaded to this repository daily around 12:30.

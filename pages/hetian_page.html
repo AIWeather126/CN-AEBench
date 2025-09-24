@@ -415,31 +415,31 @@
 
                 allData = parsed.data.map(row => {
                     const datetime = new Date(row.DATE);
-                    const staCode = String(row.staCode);
-                    const stationInfo = stations[staCode] || { name: 'Unknown', type: 'Unknown', alt: 1350 };
+                    const station_id = String(row.station_id);
+                    const stationInfo = stations[station_id] || { name: 'Unknown', type: 'Unknown', alt: 1350 };
 
                     return {
                         datetime: datetime,
-                        station: staCode,
+                        station: station_id,
                         stationName: stationInfo.name,
                         stationType: stationInfo.type,
                         altitude: stationInfo.alt,
-                        temp: row.t || row.ec_t2m || 20,
-                        dewpoint: row.dt || row.ec_d2m || 10,
-                        pressure: row.p || row.sp || 850,
-                        slp: row.slp || row.ec_msl || 1000,
-                        rh: row.rh || row.ec_rh || 30,
-                        visibility: row.vis || 5000,
-                        ws: row.ws_2min || row.ec_ws || 8,
-                        ws10min: row.ws_10min || row.ws_2min || 8,
-                        wd: row.wd_2min || row.ec_wd || 270,
-                        pm25: row['PM2.5'] || 50,
-                        pm10: row.PM10 || 200,
-                        so2: row.SO2 || 15,
-                        no2: row.NO2 || 25,
-                        o3: row.O3 || 40,
-                        co: row.CO || 0.8,
-                        aqi: row.AQI || 150
+                        temp: row.t,
+                        dewpoint: row.dt,
+                        pressure: row.p,
+                        slp: row.slp,
+                        rh: row.rh,
+                        visibility: row.vis,
+                        ws: row.ws_2min,
+                        ws10min: row.ws_10min,
+                        wd: row.wd_2min,
+                        pm25: row['PM2.5'],
+                        pm10: row.PM10,
+                        so2: row.SO2,
+                        no2: row.NO2,
+                        o3: row.O3,
+                        co: row.CO,
+                        aqi: row.AQI
                     };
                 });
 
@@ -934,8 +934,8 @@
             const colors = ['#8B4513', '#D2691E', '#CD853F', '#DEB887', '#F4A460', '#FFE4B5'];
 
             let colorIdx = 0;
-            for (const [staCode, data] of Object.entries(stationGroups)) {
-                const stationInfo = stations[staCode] || { name: 'Unknown' };
+            for (const [station_id, data] of Object.entries(stationGroups)) {
+                const stationInfo = stations[station_id] || { name: 'Unknown' };
 
                 traces.push({
                     y: data.map(d => d.pm10),

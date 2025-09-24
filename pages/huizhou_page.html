@@ -496,31 +496,31 @@
             
             allData = parsed.data.map(row => {
                 const datetime = new Date(row.DATE);
-                const staCode = String(row.staCode);
-                const stationInfo = stations[staCode] || { name: 'Unknown', type: 'Unknown' };
+                const station_id = String(row.station_id);
+                const stationInfo = stations[station_id] || { name: 'Unknown', type: 'Unknown' };
                 
                 return {
                     datetime: datetime,
-                    station: staCode,
+                    station: station_id,
                     stationName: stationInfo.name,
                     stationType: stationInfo.type,
-                    temp: row.t || row.ec_t2m || 25,
-                    dewpoint: row.dt || row.ec_d2m || 20,
-                    pressure: row.p || row.sp || 1005,
-                    slp: row.slp || row.ec_msl || 1008,
-                    rh: row.rh || row.ec_rh || 85,
-                    precipitation: row.precipitation || 0,
-                    visibility: row.vis || 5000,
-                    ws: row.ws_2min || row.ec_ws || 5,
-                    ws10min: row.ws_10min || row.ws_2min || 5,
-                    wd: row.wd_2min || row.ec_wd || 180,
-                    pm25: row['PM2.5'] || 15,
-                    pm10: row.PM10 || 25,
-                    so2: row.SO2 || 10,
-                    no2: row.NO2 || 20,
-                    o3: row.O3 || 30,
-                    co: row.CO || 0.5,
-                    aqi: row.AQI || 50
+                    temp: row.t,
+                    dewpoint: row.dt,
+                    pressure: row.p,
+                    slp: row.slp,
+                    rh: row.rh,
+                    precipitation: row.precipitation,
+                    visibility: row.vis,
+                    ws: row.ws_2min,
+                    ws10min: row.ws_10min,
+                    wd: row.wd_2min,
+                    pm25: row['PM2.5'],
+                    pm10: row.PM10,
+                    so2: row.SO2,
+                    no2: row.NO2,
+                    o3: row.O3,
+                    co: row.CO,
+                    aqi: row.AQI
                 };
             });
             
@@ -1039,8 +1039,8 @@
             const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
             
             let colorIdx = 0;
-            for (const [staCode, data] of Object.entries(stationGroups)) {
-                const stationInfo = stations[staCode] || { name: 'Unknown' };
+            for (const [station_id, data] of Object.entries(stationGroups)) {
+                const stationInfo = stations[station_id] || { name: 'Unknown' };
                 
                 traces.push({
                     y: data.map(d => d.precipitation),
