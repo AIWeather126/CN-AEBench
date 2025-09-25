@@ -3,6 +3,7 @@
 This is the official repository for the paper "CN-AEBench: Hourly Atmospheric Environmental Dataset for China (2023–Present) by Fusing Station Monitoring Data and ECMWF Forecast Data".
 
 ---
+[![GitHub repo](https://img.shields.io/badge/Github-OfficialRepository-blue)](https://github.com/AIWeather126/CN-AEBench)  [![HuggingFace](https://img.shields.io/badge/HuggingFace-Dataset-pink)](https://huggingface.co/datasets/AIWeather126/CN-AEBench) [![VisualInterface](https://img.shields.io/badge/VisualInterface-Detail-green)](https://aiweather126.github.io/CN-AEBench/pages)
 
 Dataset validity (extreme events) research and visualization, benchmark test for details, please visit: https://aiweather126.github.io/CN-AEBench/pages
 
