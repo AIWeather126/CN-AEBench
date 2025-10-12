@@ -37,41 +37,48 @@ To download the dataset & code, please visit: https://huggingface.co/datasets/AI
 
 #### Multi-source Variable Description Table
 
-| No. | Variable Name | Unit | Description |
-|-----|--------------|------|-------------|
-| 1 | ws_2min | m/s | 2-minute average wind speed |
-| 2 | ws_10min | m/s | 10-minute average wind speed |
-| 3 | wd_2min | degree | 2-minute average wind direction |
-| 4 | wd_10min | degree | 10-minute average wind direction |
-| 5 | wd_instant | degree | Instantaneous wind direction |
-| 6 | ws_instant | m/s | Instantaneous wind speed |
-| 7 | vis | m | Horizontal visibility |
-| 8 | t | °C | Air temperature |
-| 9 | dt | °C | Dew point temperature |
-| 10 | precipitation | mm | Hourly precipitation |
-| 11 | rh | % | Relative humidity |
-| 12 | p | hPa | Atmospheric pressure |
-| 13 | slp | hPa | Sea level pressure |
-| 14 | vapor | hPa | Vapor pressure |
-| 15 | phenomena | -- | Weather phenomena |
-| 16 | ec_vis | m | NWP horizontal visibility |
-| 17 | ec_sh2 | kg/kg | NWP 2m specific humidity |
-| 18 | ec_t2m | °C | NWP 2m air temperature |
-| 19 | ec_d2m | °C | NWP 2m dew point temperature |
-| 20 | ec_sp | hPa | NWP surface pressure |
-| 21 | ec_msl | hPa | NWP mean sea level pressure |
-| 22 | ec_u10 | m/s | NWP 10m u-component of wind |
-| 23 | ec_v10 | m/s | NWP 10m v-component of wind |
-| 24 | ec_rh | % | NWP relative humidity (diagnostic variable) |
-| 25 | ec_ws | m/s | NWP wind speed (diagnostic variable) |
-| 26 | ec_wd | degree | NWP wind direction (diagnostic variable) |
-| 27 | AQI | -- | Real-time AQI value |
-| 28 | PM2.5 | μg/m³ | Hourly mean PM2.5 concentration |
-| 29 | PM10 | μg/m³ | Hourly mean PM10 concentration |
-| 30 | SO2 | μg/m³ | Hourly mean SO2 concentration |
-| 31 | NO2 | μg/m³ | Hourly mean NO2 concentration |
-| 32 | O3 | μg/m³ | Hourly mean O3 concentration |
-| 33 | CO | mg/m³ | Hourly mean CO concentration |
+| No. | Variable Name | Unit                  | Description                                 |
+|-----|---------------|-----------------------|---------------------------------------------|
+| 1   | ws_2min       | m/s                   | 2-minute average wind speed                 |
+| 2   | ws_10min      | m/s                   | 10-minute average wind speed                |
+| 3   | wd_2min       | degree                | 2-minute average wind direction             |
+| 4   | wd_10min      | degree                | 10-minute average wind direction            |
+| 5   | wd_instant    | degree                | Instantaneous wind direction                |
+| 6   | ws_instant    | m/s                   | Instantaneous wind speed                    |
+| 7   | vis           | m                     | Horizontal visibility                       |
+| 8   | t             | °C                    | Air temperature                             |
+| 9   | dt            | °C                    | Dew point temperature                       |
+| 10  | precipitation | mm                    | Hourly precipitation                        |
+| 11  | rh            | %                     | Relative humidity                           |
+| 12  | p             | hPa                   | Atmospheric pressure                        |
+| 13  | slp           | hPa                   | Sea level pressure                          |
+| 14  | vapor         | hPa                   | Vapor pressure                              |
+| 15  | phenomena     | --                    | Weather phenomena                           |
+| 16  | ec_vis        | m                     | NWP horizontal visibility                   |
+| 17  | ec_sh2        | kg/kg                 | NWP 2m specific humidity                    |
+| 18  | ec_t2m        | °C                    | NWP 2m air temperature                      |
+| 19  | ec_d2m        | °C                    | NWP 2m dew point temperature                |
+| 20  | ec_sp         | hPa                   | NWP surface pressure                        |
+| 21  | ec_msl        | hPa                   | NWP mean sea level pressure                 |
+| 22  | ec_u10        | m/s                   | NWP 10m u-component of wind                 |
+| 23  | ec_v10        | m/s                   | NWP 10m v-component of wind                 |
+| 24  | ec_rh         | %                     | NWP relative humidity (diagnostic variable) |
+| 25  | ec_ws         | m/s                   | NWP wind speed (diagnostic variable)        |
+| 26  | ec_wd         | degree                | NWP wind direction (diagnostic variable)    |
+| 27  | ec_cbh        | m                     | NWP cloud base height                       |
+| 27  | ec_sf         | m of water equivalent | NWP snowfall                                |
+| 27  | ec_blh        | m                     | NWP boundary layer height                   |
+| 27  | ec_fal        | (0 ~ 1)               | NWP albedo                                  |
+| 27  | ec_lcc        | (0 ~ 1)               | NWP low cloud cover                         |
+| 27  | ec_mcc        | (0 ~ 1)               | NWP medium cloud cover                      |
+| 27  | ec_hcc        | (0 ~ 1)               | NWP high cloud cover                        |
+| 27  | ec_tp         | m                     | NWP total precipitation                     |
+| 28  | PM2.5         | μg/m³                 | Hourly mean PM2.5 concentration             |
+| 29  | PM10          | μg/m³                 | Hourly mean PM10 concentration              |
+| 30  | SO2           | μg/m³                 | Hourly mean SO2 concentration               |
+| 31  | NO2           | μg/m³                 | Hourly mean NO2 concentration               |
+| 32  | O3            | μg/m³                 | Hourly mean O3 concentration                |
+| 33  | CO            | mg/m³                 | Hourly mean CO concentration                |
 
 ## 2. Experiment Settings and Information
 The experiment was conducted on CN-AEBench-L3 ![Version](https://img.shields.io/badge/Version-1.0.0--SNAPSHOT-blue). 
