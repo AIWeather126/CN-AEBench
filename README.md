@@ -11,7 +11,7 @@ To download the dataset & code, please visit: https://huggingface.co/datasets/AI
 
 ---
 
-*CN-AEBench* is a comprehensive multi-source atmospheric & environmental dataset integrating ground meteorological observations, environmental monitoring, and ECMWF NWP data. 
+*CN-AEBench* is a comprehensive multi-source atmospheric & environmental dataset integrating ground meteorological observations, environmental monitoring, and ECMWF NWP forecast data. 
 
 ![CN-AEBench Station Distribution](./static/distribution.png)
 
