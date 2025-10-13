@@ -11,7 +11,7 @@ To download the dataset & code, please visit: https://huggingface.co/datasets/AI
 
 ---
 
-*CN-AEBench* is a comprehensive multi-source atmospheric & environmental dataset integrating ground observations, air quality monitoring, and ECMWF NWP data. 
+*CN-AEBench* is a comprehensive multi-source atmospheric & environmental dataset integrating ground meteorological observations, environmental monitoring, and ECMWF NWP data. 
 
 ![CN-AEBench Station Distribution](./static/distribution.png)
 
@@ -66,24 +66,25 @@ To download the dataset & code, please visit: https://huggingface.co/datasets/AI
 | 25  | ec_ws         | m/s                   | NWP wind speed (diagnostic variable)        |
 | 26  | ec_wd         | degree                | NWP wind direction (diagnostic variable)    |
 | 27  | ec_cbh        | m                     | NWP cloud base height                       |
-| 27  | ec_sf         | m of water equivalent | NWP snowfall                                |
-| 27  | ec_blh        | m                     | NWP boundary layer height                   |
-| 27  | ec_fal        | (0 ~ 1)               | NWP albedo                                  |
-| 27  | ec_lcc        | (0 ~ 1)               | NWP low cloud cover                         |
-| 27  | ec_mcc        | (0 ~ 1)               | NWP medium cloud cover                      |
-| 27  | ec_hcc        | (0 ~ 1)               | NWP high cloud cover                        |
-| 27  | ec_tp         | m                     | NWP total precipitation                     |
-| 28  | PM2.5         | μg/m³                 | Hourly mean PM2.5 concentration             |
-| 29  | PM10          | μg/m³                 | Hourly mean PM10 concentration              |
-| 30  | SO2           | μg/m³                 | Hourly mean SO2 concentration               |
-| 31  | NO2           | μg/m³                 | Hourly mean NO2 concentration               |
-| 32  | O3            | μg/m³                 | Hourly mean O3 concentration                |
-| 33  | CO            | mg/m³                 | Hourly mean CO concentration                |
+| 28  | ec_sf         | m of water equivalent | NWP snowfall                                |
+| 29  | ec_blh        | m                     | NWP boundary layer height                   |
+| 30  | ec_fal        | (0 ~ 1)               | NWP albedo                                  |
+| 31  | ec_lcc        | (0 ~ 1)               | NWP low cloud cover                         |
+| 32  | ec_mcc        | (0 ~ 1)               | NWP medium cloud cover                      |
+| 33  | ec_hcc        | (0 ~ 1)               | NWP high cloud cover                        |
+| 34  | ec_tp         | m                     | NWP total precipitation                     |
+| 35  | PM2.5         | μg/m³                 | Hourly mean PM2.5 concentration             |
+| 36  | PM10          | μg/m³                 | Hourly mean PM10 concentration              |
+| 37  | SO2           | μg/m³                 | Hourly mean SO2 concentration               |
+| 38  | NO2           | μg/m³                 | Hourly mean NO2 concentration               |
+| 39  | O3            | μg/m³                 | Hourly mean O3 concentration                |
+| 40  | CO            | mg/m³                 | Hourly mean CO concentration                |
+| 41  | AQI           | --                    | Real-time AQI value                         |
 
 ## 2. Experiment Settings and Information
 The experiment was conducted on CN-AEBench-L3 ![Version](https://img.shields.io/badge/Version-1.0.0--SNAPSHOT-blue). 
 
-To standardize the conditions, we set the time interval for the first version of L3 to 2023.09.01–2025.07.31. You may also choose to run your experiments on this version.
+To standardize the conditions, we set the time interval for the first version of L3 to 2023.09.01–2025.08.31. You may also choose to run your experiments on this version.
 
 ### 2.1 Research Area
 We selected four representative regions across China for comprehensive evaluation:
@@ -155,3 +156,4 @@ Domain:
   - Air Quality and Environment Forecasting
   - NWP
   - Assimilation
+  - Intelligent Model
