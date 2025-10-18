@@ -24,16 +24,16 @@ To download the dataset & code, please visit: https://huggingface.co/datasets/AI
 ## 1. Variable Information
 #### Static Descriptive Information Table
 
-| No. | Variable Name | Unit | Description |
-|-----|--------------|------|-------------|
-| 1 | altitude | m | Station elevation |
-| 2 | lon | degree | Station longitude |
-| 3 | lat | degree | Station latitude |
-| 4 | station_province | -- | Province where station is located |
-| 5 | station_city | -- | City where station is located |
-| 6 | station_id | -- | Station identifier |
-| 7 | type | -- | Land use type at station location |
-
+| No. | Variable Name    | Unit     | Description                       |
+|-----|------------------|----------|-----------------------------------|
+| 1   | altitude         | m        | Station elevation                 |
+| 2   | lon              | degree   | Station longitude                 |
+| 3   | lat              | degree   | Station latitude                  |
+| 4   | station_province | --       | Province where station is located |
+| 5   | station_city     | --       | City where station is located     |
+| 6   | station_id       | --       | Station identifier                |
+| 7   | type             | --       | Land use type at station location |
+| 8   | ndvi             | (-1 ~ 1) | ndvi value at station location    |
 
 #### Multi-source Variable Description Table
 
