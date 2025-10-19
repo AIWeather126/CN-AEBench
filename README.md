@@ -17,7 +17,7 @@ To download the dataset & code, please visit: https://huggingface.co/datasets/AI
 
 📊 Data Coverage: 2023-2025-Future
 
-🌍 Meteorological Stations: 2,250+; Air-quality Monitoring Station: ~2600
+🌍 Meteorological Stations: 2,250+; Environmental Monitoring Station: ~2600
 
 ⏱️ Resolution: 1 Hour
 
