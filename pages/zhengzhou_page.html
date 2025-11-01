@@ -1616,7 +1616,7 @@
         function updateImage(frameIndex) {
             currentFrame = parseInt(frameIndex);
             const paddedIndex = String(currentFrame).padStart(4, '0');
-            const imagePath = `./郑州/wind_field_maps/wind_field_${paddedIndex}.svg`;
+            const imagePath = `./郑州/wind_field_maps/wind_field_${paddedIndex}.png`;
 
             document.getElementById('windFieldImage').src = imagePath;
             document.getElementById('timeSlider').value = currentFrame;
@@ -1727,7 +1727,7 @@
                             wd: row.wd_2min,
                             visibility: row.vis,
                             vis: row.vis,
-                            ec_vis: row.ec_vi,
+                            ec_vis: row.ec_vis,
                             ec_t2m: row.ec_t2m,
                             dewpoint: row.dt,
                             pressure: row.p,
