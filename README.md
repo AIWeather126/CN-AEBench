@@ -1,13 +1,13 @@
 ![CN-AEBench Dataset](./static/title.png)
 
-This is the official repository for the paper "CN-AEBench: Hourly Atmospheric Environmental Dataset for China (2023–Present) by Fusing Station Monitoring Data and ECMWF Forecast Data".
+This is the official repository for the paper "CN-AEBench: Hourly Atmospheric Environmental Dataset for China (2023–Present) by Fusing Station Monitoring Data and ECMWF IFS Data".
 
 ---
-[![GitHub repo](https://img.shields.io/badge/Github-OfficialRepository-blue)](https://github.com/AIWeather126/CN-AEBench)  [![HuggingFace](https://img.shields.io/badge/HuggingFace-Dataset-pink)](https://huggingface.co/datasets/AIWeather126/CN-AEBench) [![VisualInterface](https://img.shields.io/badge/VisualInterface-Detail-green)](https://aiweather126.github.io/CN-AEBench/pages)
+[![GitHub repo](https://img.shields.io/badge/Github-OfficialRepository-blue)](https://github.com/AIWeather126/CN-AEBench) [![HuggingFace](https://img.shields.io/badge/HuggingFace-Dataset(Rolling--Updates)-pink)](https://huggingface.co/datasets/AIWeather126/CN-AEBench) [![ScienceDB](https://img.shields.io/badge/ScienceDB-Dataset(Archive)-yellow)](https://huggingface.co/datasets/AIWeather126/CN-AEBench)[![VisualInterface](https://img.shields.io/badge/VisualInterface-Detail-green)](https://aiweather126.github.io/CN-AEBench/pages)
 
 Dataset validity (extreme events) research and visualization, benchmark test for details, please visit: https://aiweather126.github.io/CN-AEBench/pages
 
-To download the dataset & code, please visit: https://huggingface.co/datasets/AIWeather126/CN-AEBench
+To download the datase, please visit: https://huggingface.co/datasets/AIWeather126/CN-AEBench
 
 ---
 
@@ -145,9 +145,8 @@ Experiment results: https://aiweather126.github.io/CN-AEBench/pages
 
 To ensure benchmark stability and comparability of research results, we release new versions only when significant improvements are made to accommodate new weather and environmental changes, with clear version numbering.
 
-L1 and L2 data for timeliness tasks are automatically uploaded to this repository daily around 12:30.
+L1 and L2 data for timeliness tasks are automatically uploaded to this repository daily around 12:30 and 21:30.
 
-We will make the dataset and code available for download once the paper is completed (the data has been released). Please wait for further updates.
 
 ---
 Domain:
