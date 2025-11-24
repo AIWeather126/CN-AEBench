@@ -145,7 +145,7 @@ Experiment results: https://aiweather126.github.io/CN-AEBench/pages
 
 To ensure benchmark stability and comparability of research results, we release new versions only when significant improvements are made to accommodate new weather and environmental changes, with clear version numbering.
 
-Data for timeliness tasks are automatically uploaded to [HuggingFace repository](https://huggingface.co/datasets/AIWeather126/CN-AEBench) daily around 12:30 and 21:30, with a latency of approximately 2 days.
+Data for timeliness tasks are automatically uploaded to [HuggingFace repository](https://huggingface.co/datasets/AIWeather126/CN-AEBench) daily around 12:30 and 21:30. Please note that due to copyright restrictions on the raw data, there is a delay of approximately 2 days.
 
 
 ---
