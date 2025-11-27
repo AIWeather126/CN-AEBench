@@ -26,7 +26,7 @@ To download the datase, please visit: https://huggingface.co/datasets/AIWeather1
 
 | No. | Variable Name    | Unit     | Description                       |
 |-----|------------------|----------|-----------------------------------|
-| 1   | altitude         | m        | Station elevation                 |
+| 1   | elevation        | m        | Station elevation                 |
 | 2   | lon              | degree   | Station longitude                 |
 | 3   | lat              | degree   | Station latitude                  |
 | 4   | station_province | --       | Province where station is located |
