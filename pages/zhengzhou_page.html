@@ -618,7 +618,7 @@
                     y: zhengzhouData.map(d => d.vis / 1000),
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'Station 57083 Vis',
+                    name: 'Station Zhengzhou Visibility',
                     line: { color: '#1e3a8a', width: 3 },
                     yaxis: 'y'
                 },
@@ -636,7 +636,7 @@
                     y: zhengzhouData.map(d => d.temp),
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'Observed T',
+                    name: 'Observed Temperature',
                     line: { color: '#f39c12', width: 2 },
                     yaxis: 'y2'
                 },
@@ -645,32 +645,43 @@
                     y: zhengzhouData.map(d => d.ec_t2m),
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'EC T2m',
+                    name: 'EC Temperature',
                     line: { color: '#e67e22', width: 2, dash: 'dot' },
                     yaxis: 'y2'
                 }
             ];
 
             const layout = {
-                xaxis: { title: 'Datetime', tickformat: '%m/%d %H:00' },
+                font: { family: 'Arial', size: 18 },  // 全局改成 16
+                xaxis: {
+                    title: 'Datetime',
+                    tickformat: '%m/%d %H:00',
+                    titlefont: { size: 20, family: 'Arial' },  // 改成 18
+                    tickfont: { size: 18, family: 'Arial' }    // 改成 16
+                },
                 yaxis: {
                     title: 'Visibility (km)',
-                    titlefont: { color: '#1e3a8a' },
-                    tickfont: { color: '#1e3a8a' }
+                    titlefont: { color: '#1e3a8a', size: 20, family: 'Arial' },  // 改成 18
+                    tickfont: { color: '#1e3a8a', size: 18, family: 'Arial' }    // 改成 16
                 },
                 yaxis2: {
                     title: 'Temperature (°C)',
-                    titlefont: { color: '#f39c12' },
-                    tickfont: { color: '#f39c12' },
+                    titlefont: { color: '#f39c12', size: 20, family: 'Arial' },  // 改成 18
+                    tickfont: { color: '#f39c12', size: 18, family: 'Arial' },   // 改成 16
                     overlaying: 'y',
                     side: 'right'
                 },
                 height: 500,
                 margin: { l: 80, r: 80, t: 30, b: 60 },
-                legend: { x: 0.5, y: 1.1, xanchor: 'center', orientation: 'h' },
+                legend: {
+                    x: 0.5,
+                    y: 1.1,
+                    xanchor: 'center',
+                    orientation: 'h',
+                    font: { family: 'Arial', size: 18 }  // 改成 16
+                },
                 hovermode: 'x unified'
             };
-
             Plotly.newPlot('chart1', traces, layout,{
     responsive: true,
     toImageButtonOptions: {
@@ -761,23 +772,29 @@
             ];
 
             const layout = {
+                font: { family: 'Arial', size: 16 },
+                legend: {
+                    font: { family: 'Arial', size: 16 }
+                },
                 xaxis: {
                     title: 'Datetime',
                     tickformat: '%m/%d %H:00',
-                    domain: [0.22, 0.78]
+                    domain: [0.22, 0.78],
+                    titlefont: { size: 18, family: 'Arial' },
+                    tickfont: { size: 16, family: 'Arial' }
                 },
                 yaxis: {
                     title: 'Visibility (km)',
-                    titlefont: { color: '#2c3e50', size: 11 },
-                    tickfont: { color: '#2c3e50', size: 10 },
+                    titlefont: { color: '#2c3e50', size: 18, family: 'Arial' },
+                    tickfont: { color: '#2c3e50', size: 16, family: 'Arial' },
                     side: 'left',
                     showgrid: false,
                     position: 0.0
                 },
                 yaxis2: {
                     title: 'RH (%)',
-                    titlefont: { color: '#3498db', size: 11 },
-                    tickfont: { color: '#3498db', size: 10 },
+                    titlefont: { color: '#3498db', size: 18, family: 'Arial' },
+                    tickfont: { color: '#3498db', size: 16, family: 'Arial' },
                     overlaying: 'y',
                     side: 'left',
                     anchor: 'free',
@@ -786,8 +803,8 @@
                 },
                 yaxis3: {
                     title: 'T-Td (°C)',
-                    titlefont: { color: '#9b59b6', size: 11 },
-                    tickfont: { color: '#9b59b6', size: 10 },
+                    titlefont: { color: '#9b59b6', size: 18, family: 'Arial' },
+                    tickfont: { color: '#9b59b6', size: 16, family: 'Arial' },
                     overlaying: 'y',
                     side: 'left',
                     anchor: 'free',
@@ -795,9 +812,9 @@
                     showgrid: false
                 },
                 yaxis4: {
-                    title: 'PM2.5 (μg/m³)',
-                    titlefont: { color: '#e74c3c', size: 11 },
-                    tickfont: { color: '#e74c3c', size: 10 },
+                    title: 'PM2.5 (μg m⁻³)',
+                    titlefont: { color: '#e74c3c', size: 18, family: 'Arial' },
+                    tickfont: { color: '#e74c3c', size: 16, family: 'Arial' },
                     overlaying: 'y',
                     side: 'right',
                     anchor: 'free',
@@ -805,9 +822,9 @@
                     showgrid: false
                 },
                 yaxis5: {
-                    title: 'PM10 (μg/m³)',
-                    titlefont: { color: '#e67e22', size: 11 },
-                    tickfont: { color: '#e67e22', size: 10 },
+                    title: 'PM10 (μg m⁻³)',
+                    titlefont: { color: '#e67e22', size: 18, family: 'Arial' },
+                    tickfont: { color: '#e67e22', size: 16, family: 'Arial' },
                     overlaying: 'y',
                     side: 'right',
                     anchor: 'free',
@@ -819,11 +836,11 @@
                 shapes: shapes,
                 annotations: [
                     { x: 0.2, y: 1.05, xref: 'paper', yref: 'paper', text: 'Blue: Fog', showarrow: false,
-                      font: { color: '#3498db', size: 12 }, bgcolor: 'rgba(52, 152, 219, 0.2)', borderpad: 4 },
+                      font: { color: '#3498db', size: 14, family: 'Arial' }, bgcolor: 'rgba(52, 152, 219, 0.2)', borderpad: 4 },
                     { x: 0.5, y: 1.05, xref: 'paper', yref: 'paper', text: 'Purple: Mixture', showarrow: false,
-                      font: { color: '#9b59b6', size: 12 }, bgcolor: 'rgba(155, 89, 182, 0.2)', borderpad: 4 },
+                      font: { color: '#9b59b6', size: 14, family: 'Arial' }, bgcolor: 'rgba(155, 89, 182, 0.2)', borderpad: 4 },
                     { x: 0.8, y: 1.05, xref: 'paper', yref: 'paper', text: 'Red: Haze', showarrow: false,
-                      font: { color: '#e74c3c', size: 12 }, bgcolor: 'rgba(231, 76, 60, 0.2)', borderpad: 4 }
+                      font: { color: '#e74c3c', size: 14, family: 'Arial' }, bgcolor: 'rgba(231, 76, 60, 0.2)', borderpad: 4 }
                 ]
             };
 
@@ -915,16 +932,28 @@
                     colorscale: 'Portland',
                     cmin: 0,
                     cmax: 200,
-                    colorbar: { title: 'PM2.5<br>(μg/m³)' }
+                    colorbar: {
+                        title: 'PM2.5<br>(μg m⁻³)',
+                        titlefont: { size: 18, family: 'Arial' },
+                        tickfont: { size: 16, family: 'Arial' }
+                    }
                 },
-                text: roseBins.map(b => `Dir: ${b.direction.toFixed(0)}°<br>PM2.5: ${b.avgPM25.toFixed(1)}<br>Speed: ${b.avgSpeed.toFixed(1)} m/s`),
+                text: roseBins.map(b => `Dir: ${b.direction.toFixed(0)}°<br>PM2.5: ${b.avgPM25.toFixed(1)}<br>Speed: ${b.avgSpeed.toFixed(1)} m s⁻¹`),
                 hovertemplate: '%{text}'
             };
 
             const layout = {
+                font: { family: 'Arial', size: 16 },
                 polar: {
-                    radialaxis: { visible: true },
-                    angularaxis: { direction: 'clockwise', rotation: 90 }
+                    radialaxis: {
+                        visible: true,
+                        tickfont: { size: 16, family: 'Arial' }
+                    },
+                    angularaxis: {
+                        direction: 'clockwise',
+                        rotation: 90,
+                        tickfont: { size: 16, family: 'Arial' }
+                    }
                 },
                 height: 500,
                 showlegend: false
