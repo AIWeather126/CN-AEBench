@@ -81,10 +81,9 @@ To download the datase, please visit: https://huggingface.co/datasets/AIWeather1
 | 40  | CO            | mg/m³                 | Hourly mean CO concentration                |
 | 41  | AQI           | --                    | Real-time AQI value                         |
 
-## 2. Experiment Settings and Information
-The experiment was conducted on CN-AEBench-L3 ![Version](https://img.shields.io/badge/Version-1.0.0--rc.1-blue). 
+## 2. AI-based Experiment Settings and Information
+The experiment was conducted on CN-AEBench-L3. 
 
-To standardize the conditions, we set the time interval for the first version of L3 to 2023.09.01–2025.08.31. You may also choose to run your experiments on this version.
 
 ### 2.1 Research Area
 We selected four representative regions across China for comprehensive evaluation:
@@ -141,7 +140,7 @@ and 188GB RAM. The system runs Ubuntu Linux with CUDA 11.7 and PyTorch 1.13.
 Experiment results: https://aiweather126.github.io/CN-AEBench/pages
 
 ## 3. Data Availability
-*CN-AEBench* L3 data is specifically designed for building end-to-end intelligent forecasting models and is currently at version 1.0.0-rc.1. ![Version](https://img.shields.io/badge/Version-1.0.0--rc.1-blue)
+*CN-AEBench* L3 data is specifically designed for building end-to-end intelligent forecasting models and is currently at version 1.0.0. ![Version](https://img.shields.io/badge/Version-1.0.0-blue)
 
 To ensure benchmark stability and comparability of research results, we release new versions only when significant improvements are made to accommodate new weather and environmental changes, with clear version numbering.
 
