@@ -82,8 +82,9 @@ To download the datase, please visit: https://huggingface.co/datasets/AIWeather1
 | 41  | AQI           | --                    | Real-time AQI value                         |
 
 ## 2. AI-based Experiment Settings and Information
-The experiment was conducted on CN-AEBench-L3. 
+The experiment was conducted on CN-AEBench-L3.
 
+To standardize the conditions, we set the time interval for the first version of L3 to 2023.09.01–2025.08.31. You may also choose to run your experiments on this version.
 
 ### 2.1 Research Area
 We selected four representative regions across China for comprehensive evaluation:
