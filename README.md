@@ -1,6 +1,6 @@
 ![CN-AEBench Dataset](./static/title.png)
 
-This is the official repository for the paper "CN-AEBench: Hourly Atmospheric Environmental Dataset for China (2023–Present) by Fusing Station Monitoring Data and ECMWF IFS Data".
+This is the official repository for the paper "CN-AEBench: Hourly Atmospheric Environmental Dataset for China (Since 2023) by Fusing Station Monitoring Data and ECMWF IFS Data".
 
 ---
 [![GitHub repo](https://img.shields.io/badge/Github-OfficialRepository-blue)](https://github.com/AIWeather126/CN-AEBench) [![HuggingFace](https://img.shields.io/badge/HuggingFace-Dataset(Rolling--Updates)-pink)](https://huggingface.co/datasets/AIWeather126/CN-AEBench) [![ScienceDB](https://img.shields.io/badge/ScienceDB-Dataset(Archive)-yellow)](http://www.doi.org/10.57760/sciencedb.31856) [![VisualInterface](https://img.shields.io/badge/VisualInterface-Detail-green)](https://aiweather126.github.io/CN-AEBench/pages)
@@ -147,6 +147,13 @@ To ensure benchmark stability and comparability of research results, we release 
 
 Data for timeliness tasks are automatically uploaded to [HuggingFace repository](https://huggingface.co/datasets/AIWeather126/CN-AEBench) daily around 12:30 and 21:30. Please note that due to copyright restrictions on the raw data, there is a delay of approximately 2 days.
 
+The raw multi-source data are obtained from provincial-level platforms including
+https://sthj.sh.gov.cn/, https://sthjt.jiangsu.gov.cn/, 
+https://aqi.zjemc.org.cn/, https://sthjt.ah.gov.cn/site/tpl/5371, 
+https://nmg.merryai.com:33864/publish/#/realtime, 
+http://hjzlxxfb.sthjt.jiangxi.gov.cn:9317/eipp/, 
+https://sthjj.zhengzhou.gov.cn/air24.jhtml, 
+https://sthjt.henan.gov.cn/, https://fjaqi.fjemc.org.cn/fb/, ……. Additional data sources will be continuously monitored and integrated.
 
 ---
 Domain:
