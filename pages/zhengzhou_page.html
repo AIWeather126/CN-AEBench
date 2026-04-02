@@ -264,7 +264,7 @@
                     <div class="color-indicator" style="background: #9b59b6;"></div>
                     <div>
                         <strong>Fog-Haze Mixture:</strong><br>
-                        80% ≤ RH < 95%, PM2.5 > 35 μg/m³, Vis < 5 km
+                        80% ≤ RH < 95%, PM2.5 > 75 μg/m³, Vis < 5 km
                     </div>
                 </div>
                 <div class="criteria-item">
@@ -459,8 +459,8 @@
         function classifyCondition(rh, pm25, visibility) {
             if (visibility >= 5000) return 'Clear';
             if (rh >= 95 && visibility < 5000) return 'Fog';
-            if (rh >= 80 && rh < 95 && pm25 > 35 && visibility < 5000) return 'Mixture';
-            if (rh < 80 && pm25 > 75 && visibility < 5000) return 'Haze';
+            if (rh >= 80 && rh < 95 && pm25 > 75 && visibility < 5000) return 'Mixture';
+            if (rh < 80 && pm25 > 150 && visibility < 5000) return 'Haze';
             return 'Clear'; // Default to Clear for other cases
         }
 
@@ -627,7 +627,7 @@
                     y: zhengzhouData.map(d => d.ec_vis / 1000),
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'EC Model Visibility',
+                    name: 'IFS Visibility',
                     line: { color: '#9b59b6', width: 2, dash: 'dash' },
                     yaxis: 'y'
                 },
@@ -645,7 +645,7 @@
                     y: zhengzhouData.map(d => d.ec_t2m),
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'EC Temperature',
+                    name: 'IFS Temperature',
                     line: { color: '#e67e22', width: 2, dash: 'dot' },
                     yaxis: 'y2'
                 }
