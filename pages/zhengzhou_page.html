@@ -902,72 +902,173 @@
         }
 
         // Chart 4: Wind Rose
+//         function createWindRose() {
+//             const windData = allData.filter(d => d.ws > 0);
+//             const sectors = 16;
+//             const sectorSize = 360 / sectors;
+//             const roseBins = [];
+//
+//             for (let i = 0; i < sectors; i++) {
+//                 const sectorStart = i * sectorSize;
+//                 const sectorEnd = (i + 1) * sectorSize;
+//                 const sectorData = windData.filter(d => d.wd >= sectorStart && d.wd < sectorEnd);
+//
+//                 if (sectorData.length > 0) {
+//                     roseBins.push({
+//                         direction: sectorStart + sectorSize / 2,
+//                         avgPM25: _.mean(sectorData.map(d => d.pm25)),
+//                         avgSpeed: _.mean(sectorData.map(d => d.ws)),
+//                         count: sectorData.length
+//                     });
+//                 }
+//             }
+//
+//             const trace = {
+//                 r: roseBins.map(b => b.avgPM25),
+//                 theta: roseBins.map(b => b.direction),
+//                 type: 'barpolar',
+//                 marker: {
+//                     color: roseBins.map(b => b.avgPM25),
+//                     colorscale: 'Portland',
+//                     cmin: 0,
+//                     cmax: 200,
+//                     colorbar: {
+//                         title: 'PM2.5<br>(μg m⁻³)',
+//                         titlefont: { size: 18, family: 'Arial' },
+//                         tickfont: { size: 16, family: 'Arial' }
+//                     }
+//                 },
+//                 text: roseBins.map(b => `Dir: ${b.direction.toFixed(0)}°<br>PM2.5: ${b.avgPM25.toFixed(1)}<br>Speed: ${b.avgSpeed.toFixed(1)} m s⁻¹`),
+//                 hovertemplate: '%{text}'
+//             };
+//
+//             const layout = {
+//                 font: { family: 'Arial', size: 16 },
+//                 polar: {
+//                     radialaxis: {
+//                         visible: true,
+//                         tickfont: { size: 16, family: 'Arial' }
+//                     },
+//                     angularaxis: {
+//                         direction: 'clockwise',
+//                         rotation: 90,
+//                         tickfont: { size: 16, family: 'Arial' }
+//                     }
+//                 },
+//                 height: 500,
+//                 showlegend: false
+//             };
+//
+//             Plotly.newPlot('chartWindRose', [trace], layout, {
+//     responsive: true,
+//     toImageButtonOptions: {
+//         format: 'svg',
+//         filename: 'chart_X',
+//         scale: 3
+//     }
+// });
+//         }
+
+
         function createWindRose() {
-            const windData = allData.filter(d => d.ws > 0);
-            const sectors = 16;
-            const sectorSize = 360 / sectors;
-            const roseBins = [];
+    const windData = allData.filter(d =>
+        d.ws > 0 &&
+        d.wd !== null && d.wd !== undefined &&
+        d.pm25 !== null && d.pm25 !== undefined
+    );
 
-            for (let i = 0; i < sectors; i++) {
-                const sectorStart = i * sectorSize;
-                const sectorEnd = (i + 1) * sectorSize;
-                const sectorData = windData.filter(d => d.wd >= sectorStart && d.wd < sectorEnd);
+    const sectors = 16;
+    const sectorSize = 360 / sectors;
+    const totalCount = windData.length;
+    const roseBins = [];
 
-                if (sectorData.length > 0) {
-                    roseBins.push({
-                        direction: sectorStart + sectorSize / 2,
-                        avgPM25: _.mean(sectorData.map(d => d.pm25)),
-                        avgSpeed: _.mean(sectorData.map(d => d.ws)),
-                        count: sectorData.length
-                    });
-                }
+    for (let i = 0; i < sectors; i++) {
+        const sectorStart = i * sectorSize;
+        const sectorEnd = (i + 1) * sectorSize;
+
+        const sectorData = windData.filter(d => {
+            // 处理 0/360 度边界
+            if (i === sectors - 1) {
+                return d.wd >= sectorStart && d.wd <= 360;
             }
+            return d.wd >= sectorStart && d.wd < sectorEnd;
+        });
 
-            const trace = {
-                r: roseBins.map(b => b.avgPM25),
-                theta: roseBins.map(b => b.direction),
-                type: 'barpolar',
-                marker: {
-                    color: roseBins.map(b => b.avgPM25),
-                    colorscale: 'Portland',
-                    cmin: 0,
-                    cmax: 200,
-                    colorbar: {
-                        title: 'PM2.5<br>(μg m⁻³)',
-                        titlefont: { size: 18, family: 'Arial' },
-                        tickfont: { size: 16, family: 'Arial' }
-                    }
-                },
-                text: roseBins.map(b => `Dir: ${b.direction.toFixed(0)}°<br>PM2.5: ${b.avgPM25.toFixed(1)}<br>Speed: ${b.avgSpeed.toFixed(1)} m s⁻¹`),
-                hovertemplate: '%{text}'
-            };
-
-            const layout = {
-                font: { family: 'Arial', size: 16 },
-                polar: {
-                    radialaxis: {
-                        visible: true,
-                        tickfont: { size: 16, family: 'Arial' }
-                    },
-                    angularaxis: {
-                        direction: 'clockwise',
-                        rotation: 90,
-                        tickfont: { size: 16, family: 'Arial' }
-                    }
-                },
-                height: 500,
-                showlegend: false
-            };
-
-            Plotly.newPlot('chartWindRose', [trace], layout, {
-    responsive: true,
-    toImageButtonOptions: {
-        format: 'svg',
-        filename: 'chart_X',
-        scale: 3
-    }
-});
+        if (sectorData.length > 0) {
+            roseBins.push({
+                direction: sectorStart + sectorSize / 2,
+                avgPM25: _.mean(sectorData.map(d => d.pm25)),
+                avgSpeed: _.mean(sectorData.map(d => d.ws)),
+                count: sectorData.length,
+                frequency: sectorData.length / totalCount * 100
+            });
         }
+    }
+
+    const maxFreq = Math.max(...roseBins.map(b => b.frequency), 5);
+
+    const trace = {
+        r: roseBins.map(b => b.frequency),
+        theta: roseBins.map(b => b.direction),
+        type: 'barpolar',
+        marker: {
+            color: roseBins.map(b => b.avgPM25),
+            colorscale: 'Portland',
+            cmin: 0,
+            cmax: 200,
+            colorbar: {
+                title: 'PM2.5<br>(μg m⁻³)',
+                titlefont: { size: 18, family: 'Arial' },
+                tickfont: { size: 16, family: 'Arial' }
+            },
+            line: {
+                color: 'white',
+                width: 1
+            }
+        },
+        text: roseBins.map(b =>
+            `Dir: ${b.direction.toFixed(1)}°` +
+            `<br>Frequency: ${b.frequency.toFixed(1)}%` +
+            `<br>PM2.5: ${b.avgPM25.toFixed(1)} μg m⁻³` +
+            `<br>Wind speed: ${b.avgSpeed.toFixed(1)} m s⁻¹` +
+            `<br>N: ${b.count}`
+        ),
+        hovertemplate: '%{text}<extra></extra>'
+    };
+
+    const layout = {
+        font: { family: 'Arial', size: 16 },
+        polar: {
+            radialaxis: {
+    visible: true,
+    title: {
+        text: 'Frequency (%)',
+        font: { size: 18, family: 'Arial' }
+    },
+    tickfont: { size: 16, family: 'Arial' },
+    range: [0, maxFreq * 1.1],
+    dtick: 1
+},
+            angularaxis: {
+                direction: 'clockwise',
+                rotation: 90,
+                tickfont: { size: 16, family: 'Arial' }
+            }
+        },
+        height: 500,
+        showlegend: false,
+        margin: { l: 40, r: 80, t: 30, b: 30 }
+    };
+
+    Plotly.newPlot('chartWindRose', [trace], layout, {
+        responsive: true,
+        toImageButtonOptions: {
+            format: 'svg',
+            filename: 'chart_X',
+            scale: 3
+        }
+    });
+}
 
         // Chart 5: Ratio Plot
         function createRatioPlot() {
