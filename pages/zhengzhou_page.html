@@ -625,7 +625,7 @@
                 {
                     x: times,
                     y: zhengzhouData.map(d => d.ec_vis / 1000),
-                    type: 'scatter',
+                    type: './scatter',
                     mode: 'lines',
                     name: 'IFS Visibility',
                     line: { color: '#9b59b6', width: 2, dash: 'dash' },
@@ -1790,12 +1790,12 @@
             }
         }
         async function testLoadZZFile() {
-            const response = await fetch('./郑州/zz_all.csv');
+            const response = await fetch('./郑州/zz_L3final.csv');
             const content = await response.text();
             const zzFile = new Blob([content], {type: 'text/csv'});
 
             if (!zzFile) {
-                showStatus('Please select zz_all.csv file first', 'error');
+                showStatus('Please select zz_L3final.csv file first', 'error');
                 return;
             }
 
@@ -1870,7 +1870,7 @@
 
                 reader.readAsText(zzFile);
             } catch (error) {
-                console.error('Error loading zz_all.csv:', error);
+                console.error('Error loading zz_L3final.csv:', error);
                 showStatus(`Error: ${error.message}`, 'error');
             }
         }
