@@ -15,7 +15,7 @@ To download the datase, please visit: https://huggingface.co/datasets/AIWeather1
 
 ![CN-AEBench Station Distribution](./static/distribution.png)
 
-📊 Data Coverage: 2023-2025-Future
+📊 Data Coverage: 2023-2026-Future
 
 🌍 Meteorological Stations: 2,250+; Environmental Monitoring Station: ~2600
 
@@ -141,7 +141,7 @@ and 188GB RAM. The system runs Ubuntu Linux with CUDA 11.7 and PyTorch 1.13.
 Experiment results: https://aiweather126.github.io/CN-AEBench/pages
 
 ## 3. Data Availability
-*CN-AEBench* L3 data is specifically designed for building end-to-end intelligent forecasting models and is currently at version 1.0.0. ![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+*CN-AEBench* L3 data is specifically designed for building end-to-end intelligent forecasting models and is currently at version 1.1.0. ![Version](https://img.shields.io/badge/Version-1.1.0-blue)
 
 To ensure benchmark stability and comparability of research results, we release new versions only when significant improvements are made to accommodate new weather and environmental changes, with clear version numbering.
 
