@@ -495,7 +495,7 @@
             });
             
             allData = parsed.data.map(row => {
-                const datetime = new Date(row.DATE);
+                const datetime = new Date(row.datetime);
                 const station_id = String(row.station_id);
                 const stationInfo = stations[station_id] || { name: 'Unknown', type: 'Unknown' };
                 

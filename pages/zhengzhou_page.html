@@ -1814,12 +1814,12 @@
                     const processedFileData = parsed.data.map(row => {
                         // Parse date - handle various formats
                         let datetime;
-                        if (row.DATE) {
+                        if (row.datetime) {
                             // Try different date parsing approaches
-                            datetime = new Date(row.DATE);
+                            datetime = new Date(row.datetime);
                             if (isNaN(datetime.getTime())) {
                                 // Try parsing as YYYY-MM-DD HH:mm:ss
-                                const parts = row.DATE.split(/[- :]/);
+                                const parts = row.datetime.split(/[- :]/);
                                 if (parts.length >= 3) {
                                     datetime = new Date(parts[0], parts[1] - 1, parts[2],
                                                       parts[3] || 0, parts[4] || 0, parts[5] || 0);
