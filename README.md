@@ -66,13 +66,13 @@ To download the datase, please visit: https://huggingface.co/datasets/AIWeather1
 | 25  | ec_ws         | m/s                   | NWP wind speed (diagnostic variable)        |
 | 26  | ec_wd         | degree                | NWP wind direction (diagnostic variable)    |
 | 27  | ec_cbh        | m                     | NWP cloud base height                       |
-| 28  | ec_sf         | m of water equivalent | NWP snowfall                                |
+| 28  | ec_sf         | m of water equivalent | NWP hourly snowfall                         |
 | 29  | ec_blh        | m                     | NWP boundary layer height                   |
 | 30  | ec_fal        | (0 ~ 1)               | NWP albedo                                  |
 | 31  | ec_lcc        | (0 ~ 1)               | NWP low cloud cover                         |
 | 32  | ec_mcc        | (0 ~ 1)               | NWP medium cloud cover                      |
 | 33  | ec_hcc        | (0 ~ 1)               | NWP high cloud cover                        |
-| 34  | ec_tp         | m                     | NWP total precipitation                     |
+| 34  | ec_tp         | m                     | NWP hourly precipitation                    |
 | 35  | PM2.5         | μg/m³                 | Hourly mean PM2.5 concentration             |
 | 36  | PM10          | μg/m³                 | Hourly mean PM10 concentration              |
 | 37  | SO2           | μg/m³                 | Hourly mean SO2 concentration               |
@@ -81,10 +81,10 @@ To download the datase, please visit: https://huggingface.co/datasets/AIWeather1
 | 40  | CO            | mg/m³                 | Hourly mean CO concentration                |
 | 41  | AQI           | --                    | Real-time AQI value                         |
 
+> **Note on `ec_tp` and `ec_sf`**: The IFS forecast provides `tp` (total precipitation) and `sf` (snowfall) as cumulative values accumulated since forecast initialization. We de-accumulate these two variables into hourly values by taking the difference between consecutive forecast steps. All other NWP variables are instantaneous quantities.
+
 ## 2. AI-based Experiment Settings and Information
 The experiment was conducted on CN-AEBench-L3.
-
-To standardize the conditions, we set the time interval for the first version of L3 to 2023.09.01–2025.08.31. You may also choose to run your experiments on this version.
 
 ### 2.1 Research Area
 We selected four representative regions across China for comprehensive evaluation:
