@@ -460,7 +460,7 @@
             if (visibility >= 5000) return 'Clear';
             if (rh >= 95 && visibility < 5000) return 'Fog';
             if (rh >= 80 && rh < 95 && pm25 > 75 && visibility < 5000) return 'Mixture';
-            if (rh < 80 && pm25 > 150 && visibility < 5000) return 'Haze';
+            if (rh < 80 && pm25 > 75 && visibility < 5000) return 'Haze';
             return 'Clear'; // Default to Clear for other cases
         }
 
